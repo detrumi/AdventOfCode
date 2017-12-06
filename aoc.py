@@ -20,11 +20,12 @@ def day_2():
     checksum = 0
     checksum2 = 0
     for line in sys.stdin:
+        if line == '\n': break
         nums = [int(i) for i in line.split()]
         checksum += max(nums) - min(nums)
 
-        checksum2 += sum([a // b for (a,b) in itertools.combinations(nums, 2) if a % b == 0])
-        checksum2 += sum([b // a for (a,b) in itertools.combinations(nums, 2) if b % a == 0])
+        checksum2 += sum(a // b for (a,b) in itertools.combinations(nums, 2) if a % b == 0)
+        checksum2 += sum(b // a for (a,b) in itertools.combinations(nums, 2) if b % a == 0)
 
     print(checksum)
     print(checksum2)
@@ -71,6 +72,18 @@ def day_3():
         values.append(val)
     print(values[i - 1])
 
+def day_4():
+    num_valid_1 = 0
+    num_valid_2 = 0
+    for line in sys.stdin:
+        if line == '\n': break
+        words = line.split()
+        if all(a != b for a,b in itertools.combinations(words, 2)):
+            num_valid_1 += 1
+        if all(sorted(list(a)) != sorted(list(b)) for a,b in itertools.combinations(words, 2)):
+            num_valid_2 += 1
+    print(num_valid_1)
+    print(num_valid_2)
 
 def main():
     day = sys.argv[1]
