@@ -85,6 +85,35 @@ def day_4():
     print(num_valid_1)
     print(num_valid_2)
 
+def day_5():
+    jumps_1 = []
+    jumps_2 = []
+    for line in sys.stdin:
+        if line == '\n': break
+        jumps_1.append(int(line))
+        jumps_2.append(int(line))
+
+    pc = 0
+    for steps_1 in range(sys.maxsize):
+        jumps_1[pc] += 1
+        pc += jumps_1[pc] - 1
+        if pc >= len(jumps_1):
+            break
+    print(steps_1 + 1)
+
+    pc = 0
+    for steps_2 in range(sys.maxsize):
+        old_pc = pc
+        pc += jumps_2[old_pc]
+        if jumps_2[old_pc] >= 3:
+            jumps_2[old_pc] -= 1
+        else:
+            jumps_2[old_pc] += 1
+        if pc >= len(jumps_2):
+            break
+    print(steps_2 + 1)
+
+
 def main():
     day = sys.argv[1]
     globals()["day_" + day]()
