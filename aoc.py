@@ -33,11 +33,44 @@ def day_3():
     n = int(sys.argv[2])
 
     # Part 1
-    ring = math.ceil(math.sqrt(float(n))) // 2 # 1,2,3...
+    ring = math.ceil(math.sqrt(float(n))) // 2
     inner_grid_size = (ring * 2 - 1) ** 2
     right_centered = inner_grid_size + ring
     side_distance = abs(n - right_centered) % max(1, 2 * ring)
     print(ring + side_distance)
+
+    # Part 2
+    values = [1]
+    i = 1
+    while values[i - 1] <= n:
+        i += 1
+
+        ring = math.ceil(math.sqrt(float(i))) // 2 # 0,1,2...
+        inner_grid_size = (ring * 2 - 1) ** 2 # 1,9,25...
+        inner_side_length = 2 * (ring - 1) # 0,2,4,6...
+        (side,pos) = divmod(i - (inner_grid_size + 1), 2 * ring) # (0..3, 0..2*ring)
+        inner_corner = inner_grid_size + 1 - (4 - side) * inner_side_length # 1,2,4,6,8,10,14,18,22,27...
+
+        val = values[i - 2] # last value
+        if side > 0 and pos == 0: # corner
+            val += values[i - 3]
+        if side == 3 and pos >= inner_side_length: # first value of current ring
+            val += values[inner_grid_size]
+        if ring == 1 and i > 2:
+            val += 1
+        else:
+            if pos > 0: # previous inner value
+                if side == 0 and pos == 1:
+                    val += values[i - 3]
+                else:
+                    val += values[inner_corner + pos - 3]
+            if pos <= inner_side_length and (side > 0 or pos > 0): # inner value
+                val += values[inner_corner + pos - 2]
+            if pos <= inner_side_length - 1: # next inner value
+                val += values[inner_corner + pos - 1]
+        values.append(val)
+    print(values[i - 1])
+
 
 def main():
     day = sys.argv[1]
