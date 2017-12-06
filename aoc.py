@@ -113,6 +113,26 @@ def day_5():
             break
     print(steps_2 + 1)
 
+def day_6():
+    banks = [int(bs) for bs in input().split()]
+    seen_configurations = []
+    for cycles in range(sys.maxsize):
+        max_blocks = max(banks)
+        max_index = banks.index(max_blocks)
+        (split, left) = divmod(max_blocks, len(banks))
+        banks[max_index] = 0
+        banks = [b + split for b in banks]
+        i = max_index
+        while left > 0:
+            i = (i + 1) % len(banks)
+            banks[i] += 1
+            left -= 1
+        if banks in seen_configurations:
+            print(cycles + 1)
+            print(len(seen_configurations) - seen_configurations.index(banks))
+            break
+        seen_configurations.append(list(banks))
+
 
 def main():
     day = sys.argv[1]
