@@ -49,7 +49,7 @@ def day_3():
         ring = math.ceil(math.sqrt(float(i))) // 2 # 0,1,2...
         inner_grid_size = (ring * 2 - 1) ** 2 # 1,9,25...
         inner_side_length = 2 * (ring - 1) # 0,2,4,6...
-        (side,pos) = divmod(i - (inner_grid_size + 1), 2 * ring) # (0..3, 0..2*ring)
+        side, pos = divmod(i - (inner_grid_size + 1), 2 * ring) # (0..3, 0..2*ring)
         inner_corner = inner_grid_size + 1 - (4 - side) * inner_side_length # 1,2,4,6,8,10,14,18,22,27...
 
         val = values[i - 2] # last value
@@ -119,7 +119,7 @@ def day_6():
     for cycles in range(sys.maxsize):
         max_blocks = max(banks)
         max_index = banks.index(max_blocks)
-        (split, left) = divmod(max_blocks, len(banks))
+        split, left = divmod(max_blocks, len(banks))
         banks[max_index] = 0
         banks = [b + split for b in banks]
         i = max_index
@@ -132,6 +132,58 @@ def day_6():
             print(len(seen_configurations) - seen_configurations.index(banks))
             break
         seen_configurations.append(list(banks))
+
+def day_7():
+    def parse_node(line):
+        parts = [s.strip() for s in line.split('->')]
+        node = parts[0].split()
+        children = []
+        if len(parts) > 1:
+            children = parts[1].split(', ')
+        return node[0], int(node[1].strip('()')), { c: None for c in children }
+
+    nodes = dict()
+    for line in sys.stdin:
+        if line == '\n': break
+        name, weight, children = parse_node(line)
+        for n in children.keys(): # Check nodes for children
+            node = nodes.get(n)
+            if node != None:
+                children[n] = node
+                del nodes[n]
+
+        def place_node(ns): # check if node is child of other
+            for cs in (n[1] for n in ns.values() if n != None):
+                try:
+                    if cs[name] == None:
+                        cs[name] = (weight, children)
+                        return True
+                except KeyError:
+                    if place_node(cs): return True
+            return False
+
+        if not place_node(nodes):
+            nodes[name] = (weight, children)
+
+    root = nodes.popitem()
+    print(root[0]) # Part 1
+
+    def find_imbalance(node):
+        weights = [find_imbalance(n) for n in node[1][1].items()]
+        for i, w in enumerate(weights):
+            i_1 = (i + 1) % len(weights)
+            if w != weights[i_1]:
+                diff = w - weights[i_1]
+                if w != weights[(i + 2) % len(weights)]: # w is odd one out
+                    imbalanced_node = list(node[1][1].items())[i]
+                    diff = -diff
+                else: # next weight is odd one out
+                    imbalanced_node = list(node[1][1].items())[i_1]
+                print(imbalanced_node[1][0] + diff)
+                break
+        return node[1][0] + sum(weights)
+
+    find_imbalance(root) # Part 2
 
 
 def main():
