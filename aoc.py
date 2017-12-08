@@ -185,6 +185,21 @@ def day_7():
 
     find_imbalance(root) # Part 2
 
+def day_8():
+    registers = dict()
+    highest_seen = -sys.maxsize
+    for line in sys.stdin:
+        if line == '\n': break
+        r,op,n,_,r2,op2,n2 = line.split()
+        if eval(str(registers.get(r2, 0)) + op2 + n2):
+            sign = 1
+            if op == 'dec':
+                sign = -1
+            registers[r] = registers.get(r, 0) + sign * int(n)
+            if registers[r] > highest_seen:
+                highest_seen = registers[r]
+    print(max(v for k,v in registers.items()))
+    print(highest_seen)
 
 def main():
     day = sys.argv[1]
