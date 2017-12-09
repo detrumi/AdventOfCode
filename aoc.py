@@ -201,6 +201,35 @@ def day_8():
     print(max(v for k,v in registers.items()))
     print(highest_seen)
 
+def day_9():
+    score = 0
+    with open('day_9_input.txt') as f:
+        line = f.readline()
+    i = 0
+    depth = 0
+    garbage = False
+    garbage_count = 0
+    while i < len(line):
+        c = line[i]
+        if garbage:
+            if c == '!':
+                i += 1
+            elif c == '>':
+                garbage = False
+            else:
+                garbage_count += 1
+        else:
+            if c == '{':
+                depth += 1
+                score += depth
+            elif c == '}':
+                depth -= 1
+            elif c == '<':
+                garbage = True
+        i += 1
+    print(score)
+    print(garbage_count)
+
 def main():
     day = sys.argv[1]
     globals()["day_" + day]()
