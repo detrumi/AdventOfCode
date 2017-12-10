@@ -234,33 +234,24 @@ def day_9():
     print(garbage_count)
 
 def day_10():
-    def shift(values, n):
-        if n == 0: return values
-        return values[-n:] + values[:256 - n]
+    def knot_hash(lengths, rounds):
+        values = list(range(256))
+        i = 0
+        skip = 0
+        for round in range(rounds):
+            for l in lengths:
+                values = values[i:] + values[:i]
+                values[0:l] = reversed(values[0:l])
+                values = values[256-i:] + values[:256-i]
+                i = (i + l + skip) % 256
+                skip += 1
+        return values
 
     if ',' in sys.argv[2]: # Part 1
-        lengths = (int(l) for l in sys.argv[2].split(','))
-        values = list(range(0, 256))
-        i = 0
-        for l, skip in zip(lengths, range(sys.maxsize)):
-            values = shift(values, 256 - i)
-            values[0:l] = reversed(values[0:l])
-            values = shift(values, i)
-            i = (i + l + skip) % 256
+        values = knot_hash((int(l) for l in sys.argv[2].split(',')), 1)
         print(values[0] * values[1])
 
-    lengths2 = list(ord(l) for l in sys.argv[2]) + [17,31,73,47,23]
-    values = list(range(0, 256))
-    i = 0
-    skip = 0
-    for round in range(64):
-        lengths = list(lengths2)
-        for l in lengths:
-            values = shift(values, 256 - i)
-            values[0:l] = reversed(values[0:l])
-            values = shift(values, i)
-            i = (i + l + skip) % 256
-            skip += 1
+    values = knot_hash(list(ord(l) for l in sys.argv[2]) + [17,31,73,47,23], 64)
     print(''.join(hex(reduce(xor, values[i:i+16]))[2:] for i in range(0, 256, 16)))
 
 def main():
