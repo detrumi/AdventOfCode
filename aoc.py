@@ -2,6 +2,9 @@ import itertools
 import math
 import sys
 
+from functools import reduce
+from operator import xor
+
 def day_1():
     digits = sys.argv[2]
 
@@ -229,6 +232,36 @@ def day_9():
         i += 1
     print(score)
     print(garbage_count)
+
+def day_10():
+    def shift(values, n):
+        if n == 0: return values
+        return values[-n:] + values[:256 - n]
+
+    if ',' in sys.argv[2]: # Part 1
+        lengths = (int(l) for l in sys.argv[2].split(','))
+        values = list(range(0, 256))
+        i = 0
+        for l, skip in zip(lengths, range(sys.maxsize)):
+            values = shift(values, 256 - i)
+            values[0:l] = reversed(values[0:l])
+            values = shift(values, i)
+            i = (i + l + skip) % 256
+        print(values[0] * values[1])
+
+    lengths2 = list(ord(l) for l in sys.argv[2]) + [17,31,73,47,23]
+    values = list(range(0, 256))
+    i = 0
+    skip = 0
+    for round in range(64):
+        lengths = list(lengths2)
+        for l in lengths:
+            values = shift(values, 256 - i)
+            values[0:l] = reversed(values[0:l])
+            values = shift(values, i)
+            i = (i + l + skip) % 256
+            skip += 1
+    print(''.join(hex(reduce(xor, values[i:i+16]))[2:] for i in range(0, 256, 16)))
 
 def main():
     day = sys.argv[1]
