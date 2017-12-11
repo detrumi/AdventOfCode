@@ -252,7 +252,40 @@ def day_10():
         print(values[0] * values[1])
 
     values = knot_hash(list(ord(l) for l in sys.argv[2]) + [17,31,73,47,23], 64)
+    print(values)
     print(''.join(hex(reduce(xor, values[i:i+16]))[2:] for i in range(0, 256, 16)))
+
+def day_11():
+    def get_distance(x, y):
+        distance = abs(y) + abs(x)
+        if (x > 0 and y < 0) or (x < 0 and y > 0):
+            distance -= min(abs(x), abs(y))
+        return distance
+
+    with open('day_11_input.txt') as f:
+        steps = f.readline().strip().split(',')
+    x = 0
+    y = 0
+    max_distance = 0
+    for step in steps:
+        if step == 'n':
+            y += 1
+        elif step == 'ne':
+            x += 1
+        elif step == 'se':
+            y -= 1
+            x += 1
+        elif step == 's':
+            y -= 1
+        elif step == 'sw':
+            x -= 1
+        elif step == 'nw':
+            y += 1
+            x -= 1
+        max_distance = max(max_distance, get_distance(x, y))
+    print(get_distance(x, y))
+    print(max_distance)
+
 
 def main():
     day = sys.argv[1]
