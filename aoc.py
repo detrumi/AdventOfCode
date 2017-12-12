@@ -286,6 +286,28 @@ def day_11():
     print(get_distance(x, y))
     print(max_distance)
 
+def day_12():
+    connections = dict()
+    for line in sys.stdin:
+        if line == '\n': break
+        p , neighbors = line.split(' <-> ')
+        connections[int(p)] = list(int(n) for n in neighbors.split(', '))
+
+    def find_connected(p, connected):
+        for n in set(connections[p]) - connected:
+            connected = find_connected(n, connected | {n})
+        return connected
+
+    print(len(find_connected(0, {0})))
+
+    group_count = 0
+    programs_left = set(connections.keys())
+    while len(programs_left) > 0:
+        p = programs_left.pop()
+        programs_left -= find_connected(p, {p})
+        group_count += 1
+    print(group_count)
+
 
 def main():
     day = sys.argv[1]
