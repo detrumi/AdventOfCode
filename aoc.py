@@ -308,6 +308,46 @@ def day_12():
         group_count += 1
     print(group_count)
 
+def day_13():
+    layers = list()
+    for line in sys.stdin:
+        if line == '\n': break
+        d, r = line.strip().split(': ')
+        layers.append((int(d), int(r), 0, True)) # depth, range, pos, moving forward?
+    layers.reverse()
+
+    def move(layers):
+        result = list()
+        for l in layers:
+            (d,r,p,forward) = l
+            if (forward and p == r - 1) or (not forward and p == 0):
+                forward = not forward
+            if forward:
+                p += 1
+            else:
+                p -= 1
+            result.append((d,r,p,forward))
+        return result
+
+    def trip(layers):
+        severity = 0
+        for t in range(sys.maxsize):
+            if len(layers) == 0: return severity
+            if layers[len(layers) - 1][0] == t: # We're at this layer now
+                (d,r,p,forward) = layers.pop()
+                if p == 0:
+                    severity += d * r
+            layers = move(layers)
+
+    print(trip(list(layers)))
+    for delay in range(sys.maxsize):
+        if trip(list(layers)) == 0:
+            first_layer = layers[len(layers) - 1]
+            print((delay, first_layer))
+            if first_layer[0] > 0 or first_layer[2] > 0: # First layer can catch you with 0 severity
+                print('Solution: ' + str(delay))
+                break
+        layers = move(layers)
 
 def main():
     day = sys.argv[1]
