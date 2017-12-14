@@ -233,27 +233,30 @@ def day_9():
     print(score)
     print(garbage_count)
 
-def day_10():
-    def knot_hash(lengths, rounds):
-        values = list(range(256))
-        i = 0
-        skip = 0
-        for round in range(rounds):
-            for l in lengths:
-                values = values[i:] + values[:i]
-                values[0:l] = reversed(values[0:l])
-                values = values[256-i:] + values[:256-i]
-                i = (i + l + skip) % 256
-                skip += 1
-        return values
+def knot_hash(lengths, rounds):
+    values = list(range(256))
+    i = 0
+    skip = 0
+    for round in range(rounds):
+        for l in lengths:
+            values = values[i:] + values[:i]
+            values[0:l] = reversed(values[0:l])
+            values = values[256-i:] + values[:256-i]
+            i = (i + l + skip) % 256
+            skip += 1
+    return values
 
+def knot_hash_hex(values, rounds):
+    values = knot_hash(values + [17,31,73,47,23], rounds)
+    return ''.join(
+        hex(reduce(xor, values[i:i+16]))[2:].rjust(2,'0')
+        for i in range(0, 256, 16))
+
+def day_10():
     if ',' in sys.argv[2]: # Part 1
         values = knot_hash((int(l) for l in sys.argv[2].split(',')), 1)
         print(values[0] * values[1])
-
-    values = knot_hash(list(ord(l) for l in sys.argv[2]) + [17,31,73,47,23], 64)
-    print(values)
-    print(''.join(hex(reduce(xor, values[i:i+16]))[2:] for i in range(0, 256, 16)))
+    print(knot_hash_hex(list(ord(l) for l in sys.argv[2]), 64))
 
 def day_11():
     def get_distance(x, y):
@@ -348,6 +351,36 @@ def day_13():
                 print('Solution: ' + str(delay))
                 break
         layers = move(layers)
+
+def day_14():
+    def hex_to_binary(s):
+        return bin(int(s, 16))[2:].rjust(4, '0')
+    key = sys.argv[2]
+    squares = []
+    for i in range(128):
+        key_values = list(ord(c) for c in key + '-' + str(i))
+        hash = knot_hash_hex(key_values, 64)
+        squares.append(list(int(b)
+            for b in ''.join(hex_to_binary(c) for c in hash)))
+    print(sum(sum(row) for row in squares))
+    def fill_region(squares, row, col):
+        if row < 0 or row >= 128 or col < 0 or col >= 128:
+            return squares
+        if squares[row][col] == 1:
+            squares[row][col] = 2
+            squares = fill_region(squares, row - 1, col)
+            squares = fill_region(squares, row + 1, col)
+            squares = fill_region(squares, row, col - 1)
+            squares = fill_region(squares, row, col + 1)
+        return squares
+    regions = 0
+    for row in range(128):
+        for col in range(128):
+            if squares[row][col] == 1:
+                regions += 1
+                squares = fill_region(squares, row, col)
+    print(regions)
+
 
 def main():
     day = sys.argv[1]
