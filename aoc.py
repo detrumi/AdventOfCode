@@ -381,6 +381,36 @@ def day_14():
                 squares = fill_region(squares, row, col)
     print(regions)
 
+def day_15():
+    a_factor = 16807
+    b_factor = 48271
+    divider = 2147483647
+    significant = 2 ** 16
+
+    a = 679
+    b = 771
+    count = 0
+    for i in range(40000000):
+        a = (a * a_factor) % divider
+        b = (b * b_factor) % divider
+        if a % significant == b % significant:
+            count += 1
+    print(count)
+
+    a = 679
+    b = 771
+    count = 0
+    for i in range(5000000):
+        a = (a * a_factor) % divider
+        while a % 4 > 0:
+            a = (a * a_factor) % divider
+        b = (b * b_factor) % divider
+        while b % 8 > 0:
+            b = (b * b_factor) % divider
+        if a % significant == b % significant:
+            count += 1
+    print(count)
+
 
 def main():
     day = sys.argv[1]
