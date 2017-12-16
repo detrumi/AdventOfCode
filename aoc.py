@@ -411,9 +411,46 @@ def day_15():
             count += 1
     print(count)
 
+def day_16():
+    import collections
+    programs = list(chr(97 + n) for n in range(16))
+    moves = []
+    with open('day_16_input.txt') as f:
+        for move in f.readline().strip().split(','):
+            move_type = move[0]
+            b = None
+            if move_type == 's':
+                a = int(move[1:])
+            elif move_type == 'x':
+                a, b = (int(n) for n in move[1:].split('/'))
+            else:
+                a, b = move[1:].split('/')
+            moves.append((move_type, a, b))
+    def dance(programs, moves):
+        for (move_type, a, b) in moves:
+            if move_type == 's':
+                programs.rotate(a)
+            else:
+                if move_type == 'p':
+                    a = programs.index(a)
+                    b = programs.index(b)
+                programs[a], programs[b] = programs[b], programs[a]
+        return programs
+    print(''.join(dance(collections.deque(programs), moves)))
+
+    orders = []
+    programs = collections.deque(programs)
+    for round in range(10**9):
+        programs = dance(programs, moves)
+        order = ''.join(programs)
+        if order in orders: # Loop detected
+            orders = orders[orders.index(order):] # Loop starting point
+            break
+        orders.append(order)
+    print(orders[(10**9 - 1) % len(orders)])
+
 
 def main():
     day = sys.argv[1]
     globals()["day_" + day]()
-
 main()
