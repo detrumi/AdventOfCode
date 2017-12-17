@@ -1,3 +1,4 @@
+import collections
 import itertools
 import math
 import sys
@@ -412,7 +413,6 @@ def day_15():
     print(count)
 
 def day_16():
-    import collections
     programs = list(chr(97 + n) for n in range(16))
     moves = []
     with open('day_16_input.txt') as f:
@@ -449,6 +449,20 @@ def day_16():
         orders.append(order)
     print(orders[(10**9 - 1) % len(orders)])
 
+def day_17():
+    input = int(sys.argv[2])
+    state = collections.deque([0])
+    index = 0
+    for i in range(2017):
+        state.rotate(-input)
+        index = (index - input) % len(state)
+        state.append(i + 1)
+    print(state[0])
+    for i in range(2017, 50 * 10**6):
+        state.rotate(-input)
+        index = (index - input) % len(state)
+        state.append(i + 1)
+    print(state[(index + 1) % len(state)])
 
 def main():
     day = sys.argv[1]
