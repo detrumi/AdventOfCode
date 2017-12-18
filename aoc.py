@@ -464,6 +464,49 @@ def day_17():
         state.append(i + 1)
     print(state[(index + 1) % len(state)])
 
+def day_18():
+    instructions = []
+    for line in sys.stdin:
+        if line == '\n': break
+        instructions.append(line.split())
+    sounds = []
+    registers = dict()
+    i = 0
+    while i < len(instructions):
+        args = instructions[i]
+        i += 1
+        if args[0] == "snd" or args[0] == "rcv":
+            x = args[1]
+            if x.islower():
+                x = registers[x]
+            else:
+                x = int(x)
+            if args[0] == "snd":
+                sounds.append(x)
+            elif args[0] == "rcv":
+                if x != 0:
+                    break
+        else:
+            instr, x, y = args
+            if y.islower():
+                y = registers[y]
+            else:
+                y = int(y)
+
+            if instr == "set":
+                registers[x] = y
+            elif instr == "add":
+                registers[x] = registers.get(x, 0) + y
+            elif instr == "mul":
+                registers[x] = registers.get(x, 0) * y
+            elif instr == "mod":
+                registers[x] = registers.get(x, 0) % y
+            elif instr == "jgz":
+                if registers.get(x, 0) > 0:
+                    i = (i - 1) + y
+    print(sounds[len(sounds) - 1])
+
+
 def main():
     day = sys.argv[1]
     globals()["day_" + day]()
