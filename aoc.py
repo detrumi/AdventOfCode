@@ -470,41 +470,108 @@ def day_18():
         if line == '\n': break
         instructions.append(line.split())
     sounds = []
-    registers = dict()
-    i = 0
-    while i < len(instructions):
-        args = instructions[i]
-        i += 1
-        if args[0] == "snd" or args[0] == "rcv":
-            x = args[1]
-            if x.islower():
-                x = registers[x]
-            else:
-                x = int(x)
-            if args[0] == "snd":
-                sounds.append(x)
-            elif args[0] == "rcv":
-                if x != 0:
-                    break
-        else:
-            instr, x, y = args
-            if y.islower():
-                y = registers[y]
-            else:
-                y = int(y)
 
-            if instr == "set":
-                registers[x] = y
-            elif instr == "add":
-                registers[x] = registers.get(x, 0) + y
-            elif instr == "mul":
-                registers[x] = registers.get(x, 0) * y
-            elif instr == "mod":
-                registers[x] = registers.get(x, 0) % y
-            elif instr == "jgz":
-                if registers.get(x, 0) > 0:
-                    i = (i - 1) + y
-    print(sounds[len(sounds) - 1])
+    def run_program(instructions, program_id):
+        registers = {'p': program_id}
+        i = 0
+        while i < len(instructions):
+            print(registers)
+            args = instructions[i]
+            i += 1
+            x = args[1]
+            if args[0] == "rcv":
+                # if registers.get(x, 0) != 0:
+                registers[x] = yield
+                print(str(program_id) + " received " + str(registers.get(x, None)))
+            elif args[0] == "snd":
+                if x.islower():
+                    x = registers.get(x, 0)
+                else:
+                    x = int(x)
+                yield x
+            else:
+                instr, x, y = args
+                if y.islower():
+                    y = registers.get(y, 0)
+                else:
+                    y = int(y)
+                if instr == "set":
+                    registers[x] = y
+                elif instr == "add":
+                    registers[x] = registers.get(x, 0) + y
+                elif instr == "mul":
+                    registers[x] = registers.get(x, 0) * y
+                elif instr == "mod":
+                    registers[x] = registers.get(x, 0) % y
+                elif instr == "jgz":
+                    if registers.get(x, 0) > 0:
+                        i = (i - 1) + y
+        print(registers)
+    runner = run_program(instructions, 0)
+    for v in runner:
+        if v == None:
+            break
+        else:
+            last = v
+    print(last)
+
+def day_19():
+    lines = []
+    line_length = 0
+    with open('day_19_input.txt', 'r') as f:
+        for line in f:
+            l = line.strip('\n')
+            lines.append(l)
+            line_length = max(line_length, len(l))
+    for i in range(len(lines)):
+        lines[i] = lines[i].ljust(line_length, ' ')
+
+    def move_dir(x, y, dir): # north, east, south, west
+        if dir == 0: y -= 1
+        elif dir == 1: x += 1
+        elif dir == 2: y += 1
+        elif dir == 3: x -= 1
+        if x < 0 or x >= line_length or y < 0 or y >= len(lines):
+            return None, None
+        return x, y
+
+    def turn(x, y, original_dir):
+        for dir in range(4):
+            if (dir + 2) % 4 != original_dir:
+                new_x, new_y = move_dir(x, y, dir)
+                if new_x != None and lines[new_y][new_x] != ' ':
+                    return dir
+
+    def follow_path(x, y, dir):
+        letters = []
+        steps = 0
+        x, y = move_dir(x, y, dir)
+        while x != None:
+            steps += 1
+            target = lines[y][x]
+            if target == ' ':
+                break
+            elif target.isupper():
+                letters.append(target)
+            elif target == '+':
+                return letters, steps, x, y
+            x, y = move_dir(x, y, dir)
+        return letters, steps, None, None
+
+    x, y = lines[0].index('|'), 0
+    dir = 2
+    letters = []
+    steps = 0
+    while True:
+        ls, ss, x, y = follow_path(x, y, dir)
+        print('steps: ' + str(ss))
+        letters += ls
+        steps += ss
+        if x == None:
+            break
+        dir = turn(x, y, dir)
+    print(''.join(letters))
+    print(steps)
 
 
 def main():
