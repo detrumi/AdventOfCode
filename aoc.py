@@ -573,6 +573,45 @@ def day_19():
     print(''.join(letters))
     print(steps)
 
+def day_20():
+    import copy
+
+    particles = []
+    def read_xyz(input):
+        return list(int(n) for n in input.strip('pva=<>').split(','))
+    with open('day_20_input.txt', 'r') as f:
+        for line in f:
+            line = line.strip()
+            particles.append(list(read_xyz(part) for part in line.split(', ')))
+    def simulate(particles, steps, check_collisions):
+        for step in range(steps):
+            seen_positions = []
+            collisions = []
+            for particle in particles:
+                for dim in range(3):
+                    particle[1][dim] += particle[2][dim]
+                    particle[0][dim] += particle[1][dim]
+                if check_collisions:
+                    if particle[0] in seen_positions:
+                        collisions.append(particle[0])
+                    else:
+                        seen_positions.append(particle[0])
+            if check_collisions:
+                particles = [p for p in particles if p[0] not in collisions]
+        return particles
+    ps = simulate(copy.deepcopy(particles), 1000, False)
+    closest = sys.maxsize
+    closest_index = 0
+    for i, particle in enumerate(ps):
+        distance = abs(particle[0][0]) + abs(particle[0][1]) + abs(particle[0][2])
+        if distance < closest:
+            closest = distance
+            closest_index = i
+    print(closest_index)
+
+    ps = simulate(list(particles), 1000, True)
+    print(len(ps))
+
 
 def main():
     day = sys.argv[1]
