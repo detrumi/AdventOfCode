@@ -23,7 +23,6 @@ part2 = go []
             _ -> go (c:prev) cs
 
 match :: String -> String -> Maybe String
-match xs ys = case filter (not . snd) ([0..] `zip` zipWith (==) xs ys) of
-    [(i, False)] -> Just (as ++ bs)
-        where (as, b:bs) = splitAt i xs
+match xs ys = case filter (not . snd) $ [0..] `zip` zipWith (==) xs ys of
+    [(i, False)] -> Just $ uncurry (++) $ tail <$> splitAt i xs
     _ -> Nothing
