@@ -42,10 +42,7 @@ fn part_1(lines: &Vec<String>) {
     let mut colors_temp: HashMap<Pos, (i32, Option<i32>)> = HashMap::new();
     while let Some((p, d, i)) = points.pop_front() {
         if colors.contains_key(&p) {
-            if colors[&p].1.is_none() || colors[&p].1 == Some(i) {
-                continue;
-            }
-            if colors[&p].0 == d {
+            if colors[&p].1.is_some() && colors[&p].1 != Some(i) && colors[&p].0 == d {
                 colors.remove(&p);
                 colors.insert(p, (d, None));
             }
@@ -86,6 +83,10 @@ fn part_2(lines: &Vec<String>) {
         points.push_back((pos, 0));
         let mut found: HashSet<Pos> = HashSet::new();
         while let Some((p, d)) = points.pop_front() {
+            if d >= 500 {
+                break;
+            }
+
             if found.contains(&p) {
                 continue;
             }
@@ -95,13 +96,12 @@ fn part_2(lines: &Vec<String>) {
             *c += 1;
             *total += d;
 
-            let limit = 1000;
-            if d < limit {
-                for n in neighbors(p) {
-                    points.push_back((n, d + 1));
-                }
+            for n in neighbors(p) {
+                points.push_back((n, d + 1));
             }
         }
     }
-    println!("Part 2: {}", distances.iter().filter(|(_,(count, d))| count == &(lines.len() as i32) && d < &10000).count());
+    println!("Part 2: {}", distances.iter()
+        .filter(|(_,(count, d))| *count as usize == lines.len() && *d < 10000)
+        .count());
 }
