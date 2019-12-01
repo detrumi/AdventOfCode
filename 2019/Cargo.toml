@@ -1,0 +1,10 @@
+[package]
+name = "AdventOfCode2019"
+version = "0.1.0"
+authors = ["Wilco Kusee <wilcokusee@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+
+[profile.release]
+debug = true
