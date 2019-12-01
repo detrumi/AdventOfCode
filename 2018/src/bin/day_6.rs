@@ -1,4 +1,4 @@
-use std::collections::{HashSet, HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -14,7 +14,7 @@ fn neighbors(p: Pos) -> Vec<Pos> {
         Pos { x: p.x - 1, y: p.y },
         Pos { x: p.x, y: p.y + 1 },
         Pos { x: p.x, y: p.y - 1 },
-    ]
+    ];
 }
 
 fn main() {
@@ -32,8 +32,14 @@ fn part_1(lines: &Vec<String>) {
     let mut points: VecDeque<(Pos, i32, i32)> = VecDeque::new(); // p, dist, color
     let mut i = 0;
     for line in lines {
-        let parts: Vec<_> = line.split(", ").map(|s| s.parse::<i32>().unwrap()).collect();
-        let pos = Pos { x: parts[0], y: parts[1]};
+        let parts: Vec<_> = line
+            .split(", ")
+            .map(|s| s.parse::<i32>().unwrap())
+            .collect();
+        let pos = Pos {
+            x: parts[0],
+            y: parts[1],
+        };
         points.push_back((pos, 0, i));
         i += 1;
     }
@@ -62,8 +68,14 @@ fn part_1(lines: &Vec<String>) {
 
     let mut best = 0;
     for color in 0..lines.len() {
-        let old = colors_temp.iter().filter(|(_,i)| i.1 == Some(color as i32)).count();
-        let new = colors.iter().filter(|(_,i)| i.1 == Some(color as i32)).count();
+        let old = colors_temp
+            .iter()
+            .filter(|(_, i)| i.1 == Some(color as i32))
+            .count();
+        let new = colors
+            .iter()
+            .filter(|(_, i)| i.1 == Some(color as i32))
+            .count();
 
         if old == new {
             best = best.max(old);
@@ -75,8 +87,14 @@ fn part_1(lines: &Vec<String>) {
 fn part_2(lines: &Vec<String>) {
     let mut distances: HashMap<Pos, (i32, i32)> = HashMap::new(); // count, total distance
     for line in lines {
-        let parts: Vec<_> = line.split(", ").map(|s| s.parse::<i32>().unwrap()).collect();
-        let pos = Pos { x: parts[0], y: parts[1]};
+        let parts: Vec<_> = line
+            .split(", ")
+            .map(|s| s.parse::<i32>().unwrap())
+            .collect();
+        let pos = Pos {
+            x: parts[0],
+            y: parts[1],
+        };
 
         let mut points: VecDeque<(Pos, i32)> = VecDeque::new(); // Pos -> distance
 
@@ -92,7 +110,7 @@ fn part_2(lines: &Vec<String>) {
             }
             found.insert(p);
 
-            let (c,total) = distances.entry(p).or_default();
+            let (c, total) = distances.entry(p).or_default();
             *c += 1;
             *total += d;
 
@@ -101,7 +119,11 @@ fn part_2(lines: &Vec<String>) {
             }
         }
     }
-    println!("Part 2: {}", distances.iter()
-        .filter(|(_,(count, d))| *count as usize == lines.len() && *d < 10000)
-        .count());
+    println!(
+        "Part 2: {}",
+        distances
+            .iter()
+            .filter(|(_, (count, d))| *count as usize == lines.len() && *d < 10000)
+            .count()
+    );
 }

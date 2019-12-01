@@ -19,11 +19,17 @@ fn main() {
     for line in lines {
         let parts: Vec<&str> = line.split(" ").collect();
         let id = parts[0][1..].parse::<i32>().unwrap();
-        let margins: Vec<i32> = parts[2][0..parts[2].len() - 1].split(",").map(|s| s.parse::<i32>().unwrap()).collect();
-        let sizes: Vec<i32> = parts[3].split("x").map(|s| s.parse::<i32>().unwrap()).collect();
+        let margins: Vec<i32> = parts[2][0..parts[2].len() - 1]
+            .split(",")
+            .map(|s| s.parse::<i32>().unwrap())
+            .collect();
+        let sizes: Vec<i32> = parts[3]
+            .split("x")
+            .map(|s| s.parse::<i32>().unwrap())
+            .collect();
 
-        for x in margins[0] .. margins[0] + sizes[0] {
-            for y in margins[1] .. margins[1] + sizes[1] {
+        for x in margins[0]..margins[0] + sizes[0] {
+            for y in margins[1]..margins[1] + sizes[1] {
                 tiles.entry(Pos { x, y }).or_default().push(id);
             }
         }

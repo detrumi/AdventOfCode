@@ -1,7 +1,7 @@
+use std::char;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::char;
 
 fn main() {
     let file = File::open("input/day_2.txt").unwrap();
@@ -23,11 +23,19 @@ fn part_1(lines: Vec<String>) {
         for i in 0..26 {
             let letter = char::from_u32('a' as u32 + i).unwrap();
             let count = line.chars().filter(|c| c == &letter).count();
-            if count == 2 { two = true; }
-            if count == 3 { three = true; }
+            if count == 2 {
+                two = true;
+            }
+            if count == 3 {
+                three = true;
+            }
         }
-        if two { twos += 1; }
-        if three { threes += 1; }
+        if two {
+            twos += 1;
+        }
+        if three {
+            threes += 1;
+        }
     }
     println!("Part 1: {}", twos * threes);
 }

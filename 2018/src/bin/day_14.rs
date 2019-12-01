@@ -35,10 +35,14 @@ fn calculate(input: usize) {
             .collect::<Vec<_>>();
 
         let len = score_board.len();
-        if check_part_2(new_digits[0], len) { return; }
+        if check_part_2(new_digits[0], len) {
+            return;
+        }
         score_board.push(new_digits[0]);
         if new_digits.len() > 1 {
-            if check_part_2(new_digits[1], len) { return; }
+            if check_part_2(new_digits[1], len) {
+                return;
+            }
             score_board.push(new_digits[1]);
         }
 

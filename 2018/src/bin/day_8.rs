@@ -13,8 +13,9 @@ fn main() {
 }
 
 fn walk_tree<'a, I>(it: &mut I) -> Option<(i32, i32)>
-    where I: Iterator<Item = i32> {
-
+where
+    I: Iterator<Item = i32>,
+{
     let mut result1 = 0;
     let mut result_nodes = vec![];
     let mut result2 = 0;
