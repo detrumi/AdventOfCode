@@ -9,32 +9,26 @@ fn main() {
         .map(|l| l.unwrap().split(")").map(|s| s.to_string()).collect())
         .collect();
 
-    let mut orbits: HashMap<String, Vec<String>> = HashMap::new();
+    let mut orbits: HashMap<String, String> = HashMap::new();
     for line in &lines {
-        orbits
-            .entry(line[1].clone())
-            .or_default()
-            .push(line[0].clone());
+        orbits.insert(line[1].clone(), line[0].clone());
     }
 
+    println!("Part 1 = {}", part_1(&orbits));
+    println!("Part 2 = {}", part_2(&lines, &orbits).unwrap());
+}
+
+fn part_1(orbits: &HashMap<String, String>) -> usize {
     let mut num_orbits = 0;
     for orbit in orbits.keys() {
         num_orbits += count(orbit.to_string(), &orbits, &mut HashSet::new());
     }
-    eprintln!("Part 1 = {:?}", num_orbits);
+    num_orbits
+}
 
-    let start = lines
-        .iter()
-        .find(|l| l[1] == "YOU")
-        .unwrap()
-        .get(0)
-        .unwrap();
-    let end = lines
-        .iter()
-        .find(|l| l[1] == "SAN")
-        .unwrap()
-        .get(0)
-        .unwrap();
+fn part_2(lines: &Vec<Vec<String>>, orbits: &HashMap<String, String>) -> Option<usize> {
+    let start = lines.iter().find(|l| l[1] == "YOU")?.first()?;
+    let end = lines.iter().find(|l| l[1] == "SAN")?.first()?;
 
     let mut nested: HashMap<String, HashSet<String>> = HashMap::new();
     for o in orbits.keys() {
@@ -43,47 +37,43 @@ fn main() {
         nested.insert(o.to_string(), hash_set);
     }
 
-    let mut results = vec![];
-    let o1: HashSet<&String> = nested["YOU"].iter().collect();
-    let o2: HashSet<&String> = nested["SAN"].iter().collect();
-    for intersection in o1.intersection(&o2) {
-        let mut start2 = start;
-        let mut end2 = end;
-
-        let mut steps = 0;
-        while start2 != *intersection {
-            start2 = orbits[start2].get(0).unwrap();
-            steps += 1;
-        }
-        while end2 != *intersection {
-            end2 = orbits[end2].get(0).unwrap();
-            steps += 1;
-        }
-        results.push(steps);
-    }
-    eprintln!("Part 2 = {:?}", results.iter().min().unwrap());
+    nested["YOU"]
+        .intersection(&nested["SAN"])
+        .map(|i| path_length(i, start, &orbits) + path_length(i, end, &orbits))
+        .min()
 }
 
-fn nest(s: String, orbits: &HashMap<String, Vec<String>>, result: &mut HashSet<String>) {
-    if orbits.get(&s).is_none() {
-        return;
+fn path_length<'a>(
+    intersection: &String,
+    mut current: &'a String,
+    orbits: &'a HashMap<String, String>,
+) -> usize {
+    let mut steps = 0;
+    while current != intersection {
+        if let Some(o) = orbits.get(current) {
+            current = o;
+            steps += 1;
+        } else {
+            break;
+        }
     }
-    for o in &orbits[&s] {
+    steps
+}
+
+fn nest(s: String, orbits: &HashMap<String, String>, result: &mut HashSet<String>) {
+    if let Some(o) = orbits.get(&s) {
         result.insert(o.clone());
         nest(o.to_string(), orbits, result);
     }
 }
 
-fn count(s: String, orbits: &HashMap<String, Vec<String>>, found: &mut HashSet<String>) -> usize {
+fn count(s: String, orbits: &HashMap<String, String>, found: &mut HashSet<String>) -> usize {
     let mut result = 0;
-    // eprintln!("s = {:?}, found = {:?}", s, found);
     found.insert(s.clone());
-    if let Some(inner) = orbits.get(&s) {
-        for o in inner {
-            result += 1;
-            if !found.contains(o) {
-                result += count(o.to_string(), orbits, found);
-            }
+    if let Some(o) = orbits.get(&s) {
+        result += 1;
+        if !found.contains(o) {
+            result += count(o.to_string(), orbits, found);
         }
     }
     result
