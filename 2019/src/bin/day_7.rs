@@ -25,9 +25,7 @@ fn part_1(codes: &Vec<i32>) {
     loop {
         let mut val = 0;
         for i in 0..5 {
-            let mut amp = Amp::new(codes.clone(), sequence[i]);
-            amp.inputs.push(val);
-            val = amp.calculate().unwrap();
+            val = Amp::new(codes.clone(), sequence[i]).calculate(val).unwrap();
         }
         max_val = max_val.max(val);
         if !sequence.next_permutation() {
@@ -45,15 +43,12 @@ fn part_2(codes: &Vec<i32>) {
             .iter()
             .map(|n| Amp::new(codes.clone(), *n))
             .collect();
-        amps[0].inputs.push(0);
 
         let mut val = 0;
         for i in 0.. {
-            if let Some(new_val) = amps[i % 5].calculate() {
-                val = new_val;
-                amps[(i + 1) % 5].inputs.push(val);
-            } else {
-                break;
+            match amps[i % 5].calculate(val) {
+                Some(new_val) => val = new_val,
+                None => break,
             }
         }
         max_val = max_val.max(val);
@@ -80,7 +75,8 @@ impl Amp {
         }
     }
 
-    fn calculate(&mut self) -> Option<i32> {
+    fn calculate(&mut self, new_input: i32) -> Option<i32> {
+        self.inputs.push(new_input);
         loop {
             let mut n = self.codes[self.index] / 100;
             let mut inputs = vec![];
