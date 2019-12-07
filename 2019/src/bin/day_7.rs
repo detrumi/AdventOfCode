@@ -15,131 +15,53 @@ fn main() {
         .next()
         .unwrap();
 
+    part_1(&codes);
+    part_2(&codes);
+}
+
+fn part_1(codes: &Vec<i32>) {
     let mut max_val = std::i32::MIN;
-    let mut sequence = vec![0, 1, 2, 3, 4];
+    let mut sequence: Vec<i32> = (0..=4).collect();
     loop {
         let mut val = 0;
         for i in 0..5 {
-            val = calculate(codes.clone(), &vec![sequence[i], val])
+            let mut amp = Amp::new(codes.clone(), sequence[i]);
+            amp.inputs.push(val);
+            val = amp.calculate().unwrap();
         }
-        if val > max_val {
-            max_val = val;
-        }
+        max_val = max_val.max(val);
         if !sequence.next_permutation() {
             break;
         }
     }
     eprintln!("Part 1 = {:?}", max_val);
+}
 
+fn part_2(codes: &Vec<i32>) {
     let mut max_val = std::i32::MIN;
-    let mut sequence = vec![5, 6, 7, 8, 9];
+    let mut sequence: Vec<i32> = (5..=9).collect();
     loop {
-        let mut amps = vec![];
-        for i in 0..5 {
-            amps.push(Amp::new(codes.clone(), sequence[i]));
-        }
+        let mut amps: Vec<Amp> = sequence
+            .iter()
+            .map(|n| Amp::new(codes.clone(), *n))
+            .collect();
         amps[0].inputs.push(0);
 
-        let mut old_val = 0;
-        let mut searching = true;
-        while searching {
-            for i in 0..5 {
-                if let Some(val) = amps[i].calculate() {
-                    old_val = val;
-                    amps[(i + 1) % 5].inputs.push(val);
-                } else {
-                    if old_val > max_val {
-                        max_val = old_val;
-                    }
-                    searching = false;
-                    break;
-                }
+        let mut val = 0;
+        for i in 0.. {
+            if let Some(new_val) = amps[i % 5].calculate() {
+                val = new_val;
+                amps[(i + 1) % 5].inputs.push(val);
+            } else {
+                break;
             }
         }
-
+        max_val = max_val.max(val);
         if !sequence.next_permutation() {
             break;
         }
     }
     eprintln!("Part 2 = {:?}", max_val);
-}
-
-fn calculate(mut codes: Vec<i32>, phases: &Vec<i32>) -> i32 {
-    let mut last_output = 0;
-    let mut phase_index = 0;
-
-    let mut i: usize = 0;
-    loop {
-        let mut n = codes[i] / 100;
-        let mut inputs = vec![];
-        while n > 0 {
-            inputs.push(n % 10);
-            n /= 10;
-        }
-        while inputs.len() < 2 {
-            inputs.push(0);
-        }
-
-        let param = |index| {
-            let target = codes[i + index + 1];
-            if inputs[index] == 0 {
-                codes[target as usize]
-            } else {
-                target
-            }
-        };
-        match codes[i] % 100 {
-            1 => {
-                let target = codes[i + 3];
-                codes[target as usize] = param(0) + param(1);
-                i += 4;
-            }
-            2 => {
-                let target = codes[i + 3];
-                codes[target as usize] = param(0) * param(1);
-                i += 4;
-            }
-            3 => {
-                if phase_index >= phases.len() {
-                    panic!("No more inputs!")
-                }
-                let target = codes[i + 1];
-                codes[target as usize] = phases[phase_index];
-                phase_index += 1;
-                i += 2;
-            }
-            4 => {
-                last_output = codes[codes[i + 1] as usize];
-                i += 2;
-            }
-            5 => {
-                if param(0) != 0 {
-                    i = param(1) as usize;
-                } else {
-                    i += 3;
-                }
-            }
-            6 => {
-                if param(0) == 0 {
-                    i = param(1) as usize;
-                } else {
-                    i += 3;
-                }
-            }
-            7 => {
-                let target = codes[i + 3];
-                codes[target as usize] = if param(0) < param(1) { 1 } else { 0 };
-                i += 4;
-            }
-            8 => {
-                let target = codes[i + 3];
-                codes[target as usize] = if param(0) == param(1) { 1 } else { 0 };
-                i += 4;
-            }
-            99 => return last_output,
-            n => panic!(format!("{}", n)),
-        }
-    }
 }
 
 #[derive(Clone)]
