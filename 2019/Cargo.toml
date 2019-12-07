@@ -5,6 +5,8 @@ authors = ["Wilco Kusee <wilcokusee@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+itertools = "0.8"
+permutohedron = "0.2.4"
 
 [profile.release]
 debug = true
