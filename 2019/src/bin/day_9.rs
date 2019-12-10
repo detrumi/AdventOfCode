@@ -14,8 +14,8 @@ fn main() {
         .next()
         .unwrap();
 
-    Program::new(mem.clone()).calculate(1);
-    Program::new(mem.clone()).calculate(2);
+    println!("Part 1 = {:?}", Program::new(mem.clone()).calculate(1)[0]);
+    println!("Part 2 = {:?}", Program::new(mem.clone()).calculate(2)[0]);
 }
 
 struct Program {
@@ -35,7 +35,8 @@ impl Program {
         }
     }
 
-    fn calculate(&mut self, input_id: i64) {
+    fn calculate(&mut self, input_id: i64) -> Vec<i64> {
+        let mut outputs = vec![];
         while let Some(instruction) = self.mem.get(self.i) {
             self.instruction = *instruction;
 
@@ -55,7 +56,7 @@ impl Program {
                     self.i += 2;
                 }
                 4 => {
-                    println!("Output = {}", self.param(1));
+                    outputs.push(self.param(1));
                     self.i += 2;
                 }
                 5 => {
@@ -86,10 +87,11 @@ impl Program {
                     self.relative_base += self.param(1);
                     self.i += 2;
                 }
-                99 => return,
+                99 => return outputs,
                 n => panic!(format!("{}", n)),
             }
         }
+        outputs
     }
 
     fn target(&self, index: usize) -> usize {
