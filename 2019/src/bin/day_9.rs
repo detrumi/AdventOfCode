@@ -15,13 +15,13 @@ fn main() {
         .unwrap();
 
     Program::new(mem.clone()).calculate(1);
-    Program::new(mem).calculate(2);
+    Program::new(mem.clone()).calculate(2);
 }
 
 struct Program {
     i: usize,
+    instruction: i64,
     relative_base: i64,
-    modes: Vec<i64>,
     mem: Vec<i64>,
 }
 
@@ -29,21 +29,17 @@ impl Program {
     fn new(mem: Vec<i64>) -> Self {
         Self {
             i: 0,
+            instruction: 0,
             relative_base: 0,
-            modes: vec![],
             mem,
         }
     }
 
     fn calculate(&mut self, input_id: i64) {
-        while let Some(&instruction) = self.mem.get(self.i) {
-            let code = instruction % 100;
-            self.modes = vec![
-                (instruction / 100) % 10,
-                (instruction / 1_000) % 10,
-                (instruction / 10_000) % 10,
-            ];
-            match code {
+        while let Some(instruction) = self.mem.get(self.i) {
+            self.instruction = *instruction;
+
+            match self.instruction % 100 {
                 1 => {
                     let value = self.param(1) + self.param(2);
                     self.write(3, value);
@@ -97,10 +93,19 @@ impl Program {
     }
 
     fn target(&self, index: usize) -> usize {
-        match self.modes[index - 1] {
+        match self.mode(index) {
             0 => self.mem[self.i + index] as usize,
-            1 => (self.i + index),
+            1 => self.i + index,
             2 => self.relative_base as usize + self.mem[self.i + index as usize] as usize,
+            _ => panic!(),
+        }
+    }
+
+    fn mode(&self, index: usize) -> i64 {
+        match index {
+            1 => (self.instruction / 100) % 10,
+            2 => (self.instruction / 1_000) % 10,
+            3 => (self.instruction / 10_000) % 10,
             _ => panic!(),
         }
     }
