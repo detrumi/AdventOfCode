@@ -6,7 +6,7 @@ fn main() {
     let file = File::open("input/day_6.txt").unwrap();
     let lines: Vec<Vec<String>> = io::BufReader::new(file)
         .lines()
-        .map(|l| l.unwrap().split(")").map(|s| s.to_string()).collect())
+        .map(|l| l.unwrap().split(')').map(|s| s.to_string()).collect())
         .collect();
 
     let mut orbits: HashMap<String, String> = HashMap::new();
@@ -26,7 +26,7 @@ fn part_1(orbits: &HashMap<String, String>) -> usize {
     num_orbits
 }
 
-fn part_2(lines: &Vec<Vec<String>>, orbits: &HashMap<String, String>) -> Option<usize> {
+fn part_2(lines: &[Vec<String>], orbits: &HashMap<String, String>) -> Option<usize> {
     let start = lines.iter().find(|l| l[1] == "YOU")?.first()?;
     let end = lines.iter().find(|l| l[1] == "SAN")?.first()?;
 
@@ -44,8 +44,8 @@ fn part_2(lines: &Vec<Vec<String>>, orbits: &HashMap<String, String>) -> Option<
 }
 
 fn path_length<'a>(
-    intersection: &String,
-    mut current: &'a String,
+    intersection: &str,
+    mut current: &'a str,
     orbits: &'a HashMap<String, String>,
 ) -> usize {
     let mut steps = 0;

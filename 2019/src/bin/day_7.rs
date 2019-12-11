@@ -8,7 +8,7 @@ fn main() {
         .lines()
         .map(|l| {
             l.unwrap()
-                .split(",")
+                .split(',')
                 .map(|n| n.parse::<i32>().unwrap())
                 .collect::<Vec<_>>()
         })
@@ -19,13 +19,13 @@ fn main() {
     part_2(&codes);
 }
 
-fn part_1(codes: &Vec<i32>) {
+fn part_1(codes: &[i32]) {
     let mut max_val = std::i32::MIN;
     let mut sequence: Vec<i32> = (0..=4).collect();
     loop {
         let mut val = 0;
-        for i in 0..5 {
-            val = Amp::new(codes.clone(), sequence[i]).calculate(val).unwrap();
+        for n in &sequence {
+            val = Amp::new(codes.to_vec(), *n).calculate(val).unwrap();
         }
         max_val = max_val.max(val);
         if !sequence.next_permutation() {
@@ -35,13 +35,13 @@ fn part_1(codes: &Vec<i32>) {
     eprintln!("Part 1 = {:?}", max_val);
 }
 
-fn part_2(codes: &Vec<i32>) {
+fn part_2(codes: &[i32]) {
     let mut max_val = std::i32::MIN;
     let mut sequence: Vec<i32> = (5..=9).collect();
     loop {
         let mut amps: Vec<Amp> = sequence
             .iter()
-            .map(|n| Amp::new(codes.clone(), *n))
+            .map(|n| Amp::new(codes.to_vec(), *n))
             .collect();
 
         let mut val = 0;

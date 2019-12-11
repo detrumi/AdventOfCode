@@ -1,4 +1,5 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
+use std::f32::consts::PI;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -13,18 +14,13 @@ impl Pos {
         Self { x, y }
     }
 
-    pub fn in_bounds(&self, width: usize, height: usize) -> bool {
+    pub fn in_bounds(self, width: usize, height: usize) -> bool {
         self.x >= 0 && self.y >= 0 && self.x < width as i32 && self.y < height as i32
     }
 
-    pub fn angle_to(&self, other: &Pos) -> f32 {
+    pub fn angle_to(self, other: Pos) -> f32 {
         let angle = f32::atan2((other.y - self.y) as f32, (other.x - self.x) as f32);
-        angle * 180.0 / std::f32::consts::PI
-    }
-
-    pub fn angle_to_north(&self, other: &Pos) -> f32 {
-        let angle = self.angle_to(other);
-        (angle + 90.0 + 360.0) % 360.0
+        (angle + 2.5 * PI) % (2.0 * PI)
     }
 }
 
@@ -100,7 +96,7 @@ fn part2(obs: Pos) {
     loop {
         let mut in_sight: Vec<(f32, Pos)> = in_sight(obs, &lines)
             .iter()
-            .map(|p| (obs.angle_to_north(p), *p))
+            .map(|p| (obs.angle_to(*p), *p))
             .collect();
         in_sight.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
         for (_dir, pos) in &in_sight {
@@ -114,7 +110,7 @@ fn part2(obs: Pos) {
     }
 }
 
-fn in_sight(obs: Pos, lines: &Vec<Vec<char>>) -> HashSet<Pos> {
+fn in_sight(obs: Pos, lines: &[Vec<char>]) -> HashSet<Pos> {
     let mut in_sight: HashSet<Pos> = HashSet::new();
 
     let width = lines[0].len();

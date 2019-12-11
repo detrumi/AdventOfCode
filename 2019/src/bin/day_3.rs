@@ -24,7 +24,7 @@ impl Pos {
         }
     }
 
-    pub fn distance(&self) -> i32 {
+    pub fn distance(self) -> i32 {
         self.x.abs() + self.y.abs()
     }
 
@@ -49,7 +49,7 @@ fn main() {
     let file = File::open("input/day_3.txt").unwrap();
     let lines = io::BufReader::new(file).lines().map(|l| {
         l.unwrap()
-            .split(",")
+            .split(',')
             .map(|s| Pos::parse(s))
             .collect::<Vec<Pos>>()
     });

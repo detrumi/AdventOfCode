@@ -3,7 +3,7 @@ use itertools::Itertools;
 fn main() {
     let mut part_1 = 0;
     let mut part_2 = 0;
-    for num in 382345..843167 {
+    for num in 382_345..843_167 {
         let digits: Vec<u32> = num
             .to_string()
             .chars()

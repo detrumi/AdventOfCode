@@ -20,7 +20,7 @@ fn main() {
         .lines()
         .map(|l| {
             l.unwrap()
-                .split(",")
+                .split(',')
                 .map(|s| s.parse::<i64>().unwrap())
                 .collect()
         })

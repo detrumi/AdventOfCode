@@ -7,7 +7,7 @@ fn main() {
     for a in 0..100 {
         for b in 0..100 {
             let val = calculate(a, b);
-            if val == 19690720 {
+            if val == 19_690_720 {
                 eprintln!("100 * a + b = {:?}", 100 * a + b);
                 return;
             }
@@ -23,7 +23,7 @@ fn calculate(input_a: usize, input_b: usize) -> usize {
         .collect();
 
     let mut codes: Vec<usize> = lines[0]
-        .split(",")
+        .split(',')
         .map(|s| s.parse::<usize>().unwrap())
         .collect();
     codes[1] = input_a;

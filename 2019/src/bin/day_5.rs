@@ -12,7 +12,7 @@ fn calculate(input_id: i32) {
         .lines()
         .map(|l| {
             l.unwrap()
-                .split(",")
+                .split(',')
                 .map(|s| s.parse::<i32>().unwrap())
                 .collect()
         })
