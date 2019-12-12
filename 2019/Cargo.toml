@@ -8,6 +8,7 @@ edition = "2018"
 itertools = "0.8"
 permutohedron = "0.2.4"
 num-integer = "0.1.41"
+rayon = "1.2.1"
 
 [profile.release]
 debug = true
