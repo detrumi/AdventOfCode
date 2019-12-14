@@ -44,13 +44,10 @@ fn main() {
     let part1 = calculate(&mappings, Part::new("FUEL", 1), &mut HashMap::new());
     println!("Part 1 = {:?}", part1);
 
-    let amount = 1935265;
-    let part2 = calculate(&mappings, Part::new("FUEL", amount), &mut HashMap::new());
-    println!(
-        "Part 2 = {}, with {} left over",
-        amount,
-        1_000_000_000_000 - part2
-    );
+    let part2 = binary_search(part1, 1_000_000_000_000, &|amount| {
+        calculate(&mappings, Part::new("FUEL", amount), &mut HashMap::new())
+    });
+    println!("Part 2 = {:?}", part2);
 }
 
 fn calculate(
@@ -79,4 +76,18 @@ fn calculate(
             }
         })
         .sum()
+}
+
+fn binary_search<F>(mut n: i64, expected: i64, f: F) -> i64
+where
+    F: Fn(i64) -> i64,
+{
+    let mut step = n;
+    let mut higher = expected > n;
+    while step > 0 {
+        n += if higher { step } else { -step };
+        step /= 2;
+        higher = expected > f(n);
+    }
+    n + if higher { 1 } else { -1 }
 }
