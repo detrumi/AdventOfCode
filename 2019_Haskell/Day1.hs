@@ -1,6 +1,6 @@
 main :: IO ()
 main = do
-    numbers <- map read . lines <$> readFile "input/day_1.txt"
+    numbers <- map read . lines <$> readFile "../2019/input/day_1.txt"
     print $ part1 numbers
     print $ part2 numbers
 
