@@ -113,7 +113,11 @@ impl Program {
     }
 
     fn param(&mut self, index: usize) -> i64 {
-        self.mem[self.target(index)]
+        let target = self.target(index);
+        if target >= self.mem.len() {
+            self.mem.resize(target + 1, 0);
+        }
+        self.mem[target]
     }
 
     fn write(&mut self, index: usize, value: i64) {
