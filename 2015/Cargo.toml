@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 md5 = "0.7"
+itertools = "0.9"
