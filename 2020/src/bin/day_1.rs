@@ -1,3 +1,5 @@
+use itertools::iproduct;
+
 const INPUT: &str = include_str!("../../input/day_1.txt");
 
 fn parse() -> Vec<usize> {
@@ -6,28 +8,18 @@ fn parse() -> Vec<usize> {
 
 fn part1() -> usize {
     let input = parse();
-    for i in 0..input.len() {
-        for j in i + 1..input.len() {
-            if input[i] + input[j] == 2020 {
-                return input[i] * input[j];
-            }
-        }
-    }
-    0
+    let (a, b) = iproduct!(&input, &input)
+        .find(|(&a, &b)| a + b == 2020)
+        .unwrap();
+    a * b
 }
 
 fn part2() -> usize {
     let input = parse();
-    for i in 0..input.len() {
-        for j in i + 1..input.len() {
-            for k in j + 1..input.len() {
-                if input[i] + input[j] + input[k] == 2020 {
-                    return input[i] * input[j] * input[k];
-                }
-            }
-        }
-    }
-    0
+    let (a, b, c) = iproduct!(&input, &input, &input)
+        .find(|(&a, &b, &c)| a + b + c == 2020)
+        .unwrap();
+    a * b * c
 }
 
 fn main() {
