@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 const INPUT: &str = include_str!("../../input/day_4.txt");
 const REQUIRED: [&str; 7] = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
 
@@ -27,45 +25,28 @@ where
     parse()
         .iter()
         .filter(|&passport| {
-            passport
-                .iter()
-                .filter(|(field, s)| check(field, s))
-                .map(|(field, _)| field)
-                .collect::<HashSet<_>>()
-                .len()
-                == REQUIRED.len()
+            passport.iter().filter(|(field, s)| check(field, s)).count() == REQUIRED.len()
         })
         .count()
 }
 
-fn part1() -> usize {
-    solve(|_, _| true)
-}
-
 fn check_field<'a>(field: &'a str, s: &'a str) -> bool {
     match field {
-        "byr" => (1920..=2002).contains(&s.parse::<usize>().unwrap()),
-        "iyr" => (2010..=2020).contains(&s.parse::<usize>().unwrap()),
-        "eyr" => (2020..=2030).contains(&s.parse::<usize>().unwrap()),
+        "byr" => matches!(s.parse().unwrap(), 1920..=2002),
+        "iyr" => matches!(s.parse().unwrap(), 2010..=2020),
+        "eyr" => matches!(s.parse().unwrap(), 2020..=2030),
         "hgt" if s.ends_with("cm") => {
-            (150..=193).contains(&s.trim_end_matches("cm").parse::<usize>().unwrap())
+            matches!(s.trim_end_matches("cm").parse().unwrap(), 150..=193)
         }
-        "hgt" if s.ends_with("in") => {
-            (59..=76).contains(&s.trim_end_matches("in").parse::<usize>().unwrap())
-        }
+        "hgt" if s.ends_with("in") => matches!(s.trim_end_matches("in").parse().unwrap(), 59..=76),
         "hcl" => s.starts_with('#') && s.trim_start_matches('#').chars().all(|c| c.is_digit(16)),
         "ecl" => ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].contains(&s),
         "pid" => s.len() == 9 && s.chars().all(|c| c.is_digit(10)),
-        "cid" => true,
         _ => false,
     }
 }
 
-fn part2() -> usize {
-    solve(check_field)
-}
-
 fn main() {
-    println!("Part 1: {}", part1());
-    println!("Part 2: {}", part2());
+    println!("Part 1: {}", solve(|_, _| true));
+    println!("Part 2: {}", solve(check_field));
 }
