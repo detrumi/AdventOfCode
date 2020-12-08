@@ -9,15 +9,17 @@ enum Op {
     Nop,
 }
 
+use Op::*;
+
 fn parse() -> Vec<(Op, i32)> {
     INPUT
         .lines()
         .map(|line| {
             let parts: Vec<_> = line.split_ascii_whitespace().collect();
             let instr = match parts[0] {
-                "acc" => Op::Acc,
-                "jmp" => Op::Jmp,
-                "nop" => Op::Nop,
+                "acc" => Acc,
+                "jmp" => Jmp,
+                "nop" => Nop,
                 _ => panic!(format!("Unknown op: {}", parts[0])),
             };
             let num = parts[1].parse::<i32>().unwrap();
@@ -31,15 +33,11 @@ fn solve(input: Vec<(Op, i32)>) -> Result<i32, i32> {
     let mut acc = 0;
     let mut executed = HashSet::new();
     while executed.insert(i) {
-        if i as usize >= input.len() {
-            return Err(acc);
-        }
-
-        let (op, num) = &input[i as usize];
+        let (op, num) = input.get(i as usize).ok_or(acc)?;
         match op {
-            Op::Acc => acc += num,
-            Op::Jmp => i += num - 1,
-            Op::Nop => (),
+            Acc => acc += num,
+            Jmp => i += num - 1,
+            Nop => (),
         }
         i += 1;
     }
@@ -55,9 +53,9 @@ fn part2() -> i32 {
     for (i, (op, _num)) in initial_input.iter().enumerate() {
         let mut input = initial_input.clone();
         match *op {
-            Op::Acc => continue,
-            Op::Jmp => input[i].0 = Op::Nop,
-            Op::Nop => input[i].0 = Op::Jmp,
+            Acc => continue,
+            Jmp => input[i].0 = Nop,
+            Nop => input[i].0 = Jmp,
         }
         if let Err(acc) = solve(input) {
             return acc;
