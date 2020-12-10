@@ -1,4 +1,4 @@
-use itertools::sorted;
+use itertools::{sorted, Itertools};
 
 const INPUT: &str = include_str!("../../input/day_10.txt");
 
@@ -8,22 +8,16 @@ fn parse() -> Vec<usize> {
 
 fn part1() -> usize {
     let numbers = parse();
-
-    let mut current = 0;
-    let mut differences = vec![0, 0, 1];
-    for n in numbers {
-        let diff = n - current;
-        differences[diff - 1] += 1;
-        current = n;
+    let mut differences = [numbers[0], 0, 1];
+    for (a, b) in numbers.iter().tuple_windows() {
+        differences[b - a - 1] += 1;
     }
     differences[0] * differences[2]
 }
 
 fn part2() -> usize {
-    let numbers = parse();
-
     let mut ways = vec![(0, 1)];
-    for n in numbers {
+    for n in parse() {
         let new_ways = ways
             .iter()
             .rev()
