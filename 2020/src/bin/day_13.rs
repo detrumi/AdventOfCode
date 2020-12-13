@@ -17,27 +17,46 @@ fn part1() -> u32 {
     unreachable!()
 }
 
-fn part2() -> u128 {
-    let input: Vec<_> = INPUT.lines().collect();
-    let mut ids: Vec<(u128, u128)> = input[1]
+fn egcd(a: i64, b: i64) -> (i64, i64, i64) {
+    if a == 0 {
+        (b, 0, 1)
+    } else {
+        let (g, x, y) = egcd(b % a, a);
+        (g, y - (b / a) * x, x)
+    }
+}
+
+fn mod_inv(x: i64, n: i64) -> i64 {
+    let (_, x, _) = egcd(x, n);
+    (x % n + n) % n
+}
+
+fn chinese_remainder(residues: &[i64], modulii: &[i64]) -> i64 {
+    let prod = modulii.iter().product::<i64>();
+    let sum: i64 = residues
+        .iter()
+        .zip(modulii)
+        .map(|(&residue, &modulus)| {
+            let p = prod / modulus;
+            residue * mod_inv(p, modulus) * p
+        })
+        .sum();
+
+    sum % prod
+}
+
+fn part2() -> i64 {
+    let ids: Vec<(i64, i64)> = INPUT
+        .lines()
+        .nth(1)
+        .unwrap()
         .split(',')
         .enumerate()
-        .filter_map(|(offset, part)| part.parse().ok().map(|id| (offset as u128, id)))
+        .filter_map(|(offset, part)| part.parse().ok().map(|id| (offset as i64, id)))
         .collect();
-    let line_a = ids[0].1;
-    ids = ids.into_iter().skip(1).collect();
-    let line_b = ids.iter().find(|(offset, _)| *offset == line_a).unwrap().1;
-    ids.sort_by_key(|(_offset, id)| std::cmp::Reverse(*id));
-    ids.retain(|(offset, _)| *offset != line_a);
-
-    let prod = line_a * line_b;
-    for x in 100_000_000_000_000 / prod.. {
-        let n = prod * x - line_a;
-        if ids.iter().all(|(offset, line)| (n + offset) % line == 0) {
-            return n;
-        }
-    }
-    unreachable!()
+    let residues: Vec<_> = ids.iter().map(|(offset, id)| id - offset).collect();
+    let modulii: Vec<_> = ids.iter().map(|(_, id)| *id).collect();
+    chinese_remainder(&residues, &modulii)
 }
 
 fn main() {
