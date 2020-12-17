@@ -1,83 +1,48 @@
+use itertools::Itertools;
+
 use std::collections::HashSet;
 
 const INPUT: &str = include_str!("../../input/day_17.txt");
 
-fn part1() -> usize {
-    let len = INPUT.lines().count() as i32;
-    let mut old: HashSet<(i32, i32, i32)> = INPUT
+fn solve(dimensions: usize) -> usize {
+    let mut old: HashSet<Vec<i32>> = INPUT
         .lines()
         .enumerate()
         .flat_map(|(y, l)| {
             l.chars()
                 .enumerate()
                 .filter(|(_x, c)| *c == '#')
-                .map(move |(x, _)| (x as i32, y as i32, 0))
+                .map(move |(x, _)| {
+                    let mut v = vec![x as i32, y as i32];
+                    v.resize(dimensions, 0);
+                    v
+                })
         })
         .collect();
 
-    for cycle in 1..=6 {
-        let mut new = HashSet::new();
-        for z in -cycle..len + cycle {
-            for y in -cycle..len + cycle {
-                for x in -cycle..len + cycle {
-                    let mut count = 0;
-                    for dz in -1..=1 {
-                        for dy in -1..=1 {
-                            for dx in -1..=1 {
-                                if dx != 0 || dy != 0 || dz != 0 {
-                                    count += old.contains(&(x + dx, y + dy, z + dz)) as usize;
-                                }
-                            }
-                        }
-                    }
-                    if count == 3 || (old.contains(&(x, y, z)) && count == 2) {
-                        new.insert((x, y, z));
-                    }
-                }
-            }
-        }
-        old = new;
-    }
-    old.len()
-}
-
-fn part2() -> usize {
     let len = INPUT.lines().count() as i32;
-    let mut old: HashSet<(i32, i32, i32, i32)> = INPUT
-        .lines()
-        .enumerate()
-        .flat_map(|(y, l)| {
-            l.chars()
-                .enumerate()
-                .filter(|(_x, c)| *c == '#')
-                .map(move |(x, _)| (x as i32, y as i32, 0, 0))
-        })
-        .collect();
-
     for cycle in 1..=6 {
         let mut new = HashSet::new();
-        for w in -cycle..len + cycle {
-            for z in -cycle..len + cycle {
-                for y in -cycle..len + cycle {
-                    for x in -cycle..len + cycle {
-                        let mut count = 0;
-                        for dw in -1..=1 {
-                            for dz in -1..=1 {
-                                for dy in -1..=1 {
-                                    for dx in -1..=1 {
-                                        if dx != 0 || dy != 0 || dz != 0 || dw != 0 {
-                                            count += old.contains(&(x + dx, y + dy, z + dz, w + dw))
-                                                as usize;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if count == 3 || (old.contains(&(x, y, z, w)) && count == 2) {
-                            new.insert((x, y, z, w));
-                        }
-                    }
-                }
+        for positions in (0..dimensions)
+            .map(|_| -cycle..len + cycle)
+            .multi_cartesian_product()
+        {
+            let count = (0..dimensions)
+                .map(|_| -1..=1)
+                .multi_cartesian_product()
+                .filter(|deltas| deltas.iter().any(|d| *d != 0))
+                .filter(|deltas| {
+                    old.contains(
+                        &positions
+                            .iter()
+                            .zip(deltas)
+                            .map(|(p, d)| p + d)
+                            .collect::<Vec<i32>>(),
+                    )
+                })
+                .count();
+            if count == 3 || (count == 2 && old.contains(&positions)) {
+                new.insert(positions);
             }
         }
         old = new;
@@ -86,6 +51,6 @@ fn part2() -> usize {
 }
 
 fn main() {
-    println!("Part 1: {}", part1());
-    println!("Part 2: {}", part2());
+    println!("Part 1: {}", solve(3));
+    println!("Part 2: {}", solve(4));
 }
