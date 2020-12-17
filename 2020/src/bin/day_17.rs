@@ -1,15 +1,16 @@
 use itertools::Itertools;
 
 use std::collections::HashSet;
+use std::iter;
 
 const INPUT: &str = include_str!("../../input/day_17.txt");
 
 fn solve(dimensions: usize) -> usize {
-    let mut old: HashSet<Vec<i32>> = INPUT
+    let state: HashSet<Vec<i32>> = INPUT
         .lines()
         .enumerate()
-        .flat_map(|(y, l)| {
-            l.chars()
+        .flat_map(|(y, line)| {
+            line.chars()
                 .enumerate()
                 .filter(|(_x, c)| *c == '#')
                 .map(move |(x, _)| {
@@ -20,34 +21,31 @@ fn solve(dimensions: usize) -> usize {
         })
         .collect();
 
-    let len = INPUT.lines().count() as i32;
-    for cycle in 1..=6 {
-        let mut new = HashSet::new();
-        for positions in (0..dimensions)
-            .map(|_| -cycle..len + cycle)
-            .multi_cartesian_product()
-        {
-            let count = (0..dimensions)
-                .map(|_| -1..=1)
+    (1..=6)
+        .fold(state, |state, cycle| {
+            iter::repeat(-cycle..INPUT.lines().count() as i32 + cycle)
+                .take(dimensions)
                 .multi_cartesian_product()
-                .filter(|deltas| deltas.iter().any(|d| *d != 0))
-                .filter(|deltas| {
-                    old.contains(
-                        &positions
-                            .iter()
-                            .zip(deltas)
-                            .map(|(p, d)| p + d)
-                            .collect::<Vec<i32>>(),
-                    )
+                .filter(|positions| {
+                    let count = iter::repeat(-1..=1)
+                        .take(dimensions)
+                        .multi_cartesian_product()
+                        .filter(|deltas| deltas.iter().any(|d| *d != 0))
+                        .filter(|deltas| {
+                            state.contains(
+                                &positions
+                                    .iter()
+                                    .zip(deltas)
+                                    .map(|(p, d)| p + d)
+                                    .collect::<Vec<i32>>(),
+                            )
+                        })
+                        .count();
+                    count == 3 || (count == 2 && state.contains(positions))
                 })
-                .count();
-            if count == 3 || (count == 2 && old.contains(&positions)) {
-                new.insert(positions);
-            }
-        }
-        old = new;
-    }
-    old.len()
+                .collect()
+        })
+        .len()
 }
 
 fn main() {
