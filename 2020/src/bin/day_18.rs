@@ -8,6 +8,13 @@ enum Op {
 
 use Op::*;
 
+fn calculate((last, op): &mut (usize, Op), n: usize) {
+    *last = match op {
+        Add => *last + n,
+        Mul => *last * n,
+    }
+}
+
 fn solve<S: Into<String>>(input: impl Iterator<Item = S>) -> Option<usize> {
     let mut result = 0;
     for line in input {
@@ -17,23 +24,12 @@ fn solve<S: Into<String>>(input: impl Iterator<Item = S>) -> Option<usize> {
                 '(' => stack.push((0, Add)),
                 ')' => {
                     let (n, _) = stack.pop()?;
-                    let (last, op) = stack.last_mut()?;
-                    *last = match op {
-                        Add => *last + n,
-                        Mul => *last * n,
-                    }
+                    calculate(stack.last_mut()?, n);
                 }
                 '+' => stack.last_mut()?.1 = Add,
                 '*' => stack.last_mut()?.1 = Mul,
                 ' ' => (),
-                _ => {
-                    let n = c.to_digit(10)? as usize;
-                    let (last, op) = stack.last_mut()?;
-                    *last = match op {
-                        Add => *last + n,
-                        Mul => *last * n,
-                    };
-                }
+                _ => calculate(stack.last_mut()?, c.to_digit(10)? as usize),
             }
         }
         result += stack[0].0;
