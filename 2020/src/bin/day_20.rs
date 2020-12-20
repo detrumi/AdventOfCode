@@ -1,8 +1,13 @@
-#![feature(destructuring_assignment)]
-
+use itertools::iproduct;
 use std::collections::HashMap;
 
 const INPUT: &str = include_str!("../../input/day_20.txt");
+const MONSTER: [&'static str; 3] = [
+    "                  # ",
+    "#    ##    ##    ###",
+    " #  #  #  #  #  #   ",
+];
+
 type Tile = Vec<Vec<bool>>;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Debug)]
@@ -26,20 +31,21 @@ fn rotate(tile: Tile) -> Tile {
     result
 }
 
+fn parse_tile<'a>(lines: impl Iterator<Item = &'a str>) -> Tile {
+    lines
+        .map(|line| line.chars().map(|c| c == '#').collect())
+        .collect()
+}
+
 fn parse() -> HashMap<Configuration, Tile> {
     let mut result = HashMap::new();
     for chunk in INPUT.split("\n\n") {
         let lines: Vec<_> = chunk.lines().collect();
         let id = lines[0]
-            .trim_start_matches("Tile ")
-            .trim_end_matches(':')
+            .trim_matches(|c: char| !c.is_digit(10))
             .parse()
             .unwrap();
-        let mut tile: Tile = lines
-            .iter()
-            .skip(1)
-            .map(|line| line.chars().map(|c| c == '#').collect())
-            .collect();
+        let mut tile = parse_tile(lines.into_iter().skip(1));
 
         for f in 0..2 {
             for r in 0..4 {
@@ -80,9 +86,8 @@ fn find_arrangement(tiles: &HashMap<Configuration, Tile>) -> Vec<Vec<Configurati
     let size = (tiles.len() as f32 / 8.0).sqrt() as usize;
     'outer: for (&starting_conf, _starting_tile) in tiles {
         let mut arrangement = vec![vec![starting_conf]];
-
-        let (mut y, mut x) = (0, 1);
-        while y < size {
+        let mut x = 1;
+        for y in 0..size {
             while x < size {
                 let (side, last_conf) = match x {
                     0 => (0, arrangement[y - 1][0]),
@@ -96,16 +101,12 @@ fn find_arrangement(tiles: &HashMap<Configuration, Tile>) -> Vec<Vec<Configurati
                 {
                     arrangement[y].push(*new_conf);
                     x += 1;
-                    if x == size {
-                        x = 0;
-                        y += 1;
-                        arrangement.push(vec![]);
-                        break;
-                    }
                 } else {
                     continue 'outer;
                 }
             }
+            x = 0;
+            arrangement.push(vec![]);
         }
         arrangement.pop();
         return arrangement;
@@ -121,50 +122,31 @@ fn part1(arrangement: &Vec<Vec<Configuration>>) -> usize {
 }
 
 fn arrange(arrangement: &Vec<Vec<Configuration>>, tiles: &HashMap<Configuration, Tile>) -> Tile {
-    let len = tiles.values().next().unwrap().len();
-    let mut big_tile = vec![];
-    for tile_row in arrangement {
-        let row_tiles: Vec<Tile> = tile_row.iter().map(|c| tiles[c].clone()).collect();
-        for row in 1..len - 1 {
-            big_tile.push(
+    arrangement
+        .iter()
+        .map(|tile_row| tile_row.iter().map(|c| tiles[c].clone()))
+        .flat_map(|row_tiles| {
+            (1..tiles.values().next().unwrap().len() - 1).map(move |row| {
                 row_tiles
-                    .iter()
+                    .clone()
                     .flat_map(|tile| tile[row][1..tile[row].len() - 1].to_vec())
-                    .collect(),
-            );
-        }
-    }
-    big_tile
+                    .collect()
+            })
+        })
+        .collect()
 }
 
-fn part2(big_tile: Tile) -> usize {
-    let mut monster: Tile = [
-        "                  # ",
-        "#    ##    ##    ###",
-        " #  #  #  #  #  #   ",
-    ]
-    .iter()
-    .map(|line| line.chars().map(|c| c == '#').collect())
-    .collect();
-
-    let mut monster_parts = vec![vec![false; big_tile[0].len()]; big_tile.len()];
+fn part2(tile: Tile) -> usize {
+    let mut monster = parse_tile(MONSTER.iter().cloned());
+    let mut monster_parts = vec![vec![false; tile[0].len()]; tile.len()];
     for _f in 0..2 {
         for _r in 0..4 {
-            for y in 0..big_tile.len() - monster.len() {
-                'outer: for x in 0..big_tile[0].len() - monster[0].len() {
-                    for dy in 0..monster.len() {
-                        for dx in 0..monster[0].len() {
-                            if monster[dy][dx] && !big_tile[y + dy][x + dx] {
-                                continue 'outer;
-                            }
-                        }
-                    }
-                    for dy in 0..monster.len() {
-                        for dx in 0..monster[0].len() {
-                            if monster[dy][dx] {
-                                monster_parts[y + dy][x + dx] = true;
-                            }
-                        }
+            for y in 0..tile.len() - monster.len() {
+                for x in 0..tile[0].len() - monster[0].len() {
+                    let offsets = iproduct!(0..monster.len(), 0..monster[0].len())
+                        .filter(|&(dy, dx)| monster[dy][dx]);
+                    if offsets.clone().all(|(dy, dx)| tile[y + dy][x + dx]) {
+                        offsets.for_each(|(dy, dx)| monster_parts[y + dy][x + dx] = true);
                     }
                 }
             }
@@ -176,14 +158,14 @@ fn part2(big_tile: Tile) -> usize {
         monster_parts = flip(monster_parts);
     }
 
-    let total: usize = big_tile
+    let total = tile
         .iter()
-        .map(|line| line.iter().filter(|b| **b).count())
-        .sum();
-    let parts: usize = monster_parts
+        .flat_map(|line| line.iter().filter(|b| **b))
+        .count();
+    let parts = monster_parts
         .iter()
-        .map(|line| line.iter().filter(|b| **b).count())
-        .sum();
+        .flat_map(|line| line.iter().filter(|b| **b))
+        .count();
     total - parts
 }
 
