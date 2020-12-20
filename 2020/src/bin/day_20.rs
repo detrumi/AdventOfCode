@@ -47,13 +47,13 @@ fn parse() -> HashMap<Configuration, Tile> {
             .unwrap();
         let mut tile = parse_tile(lines.into_iter().skip(1));
 
-        for f in 0..2 {
-            for r in 0..4 {
+        for &flipped in &[false, true] {
+            for rotation in 0..4 {
                 result.insert(
                     Configuration {
                         id,
-                        rotation: r,
-                        flipped: f != 0,
+                        rotation,
+                        flipped,
                     },
                     tile.clone(),
                 );
@@ -85,7 +85,8 @@ fn tiles_match(tile: &Tile, neighbor: &Tile, side: usize) -> bool {
 fn find_arrangement(tiles: &HashMap<Configuration, Tile>) -> Vec<Vec<Configuration>> {
     let size = (tiles.len() as f32 / 8.0).sqrt() as usize;
     'outer: for (&starting_conf, _starting_tile) in tiles {
-        let mut arrangement = vec![vec![starting_conf]];
+        let mut arrangement = vec![vec![]; size];
+        arrangement[0].push(starting_conf);
         let mut x = 1;
         for y in 0..size {
             while x < size {
@@ -106,12 +107,10 @@ fn find_arrangement(tiles: &HashMap<Configuration, Tile>) -> Vec<Vec<Configurati
                 }
             }
             x = 0;
-            arrangement.push(vec![]);
         }
-        arrangement.pop();
         return arrangement;
     }
-    panic!()
+    unreachable!()
 }
 
 fn part1(arrangement: &Vec<Vec<Configuration>>) -> usize {
