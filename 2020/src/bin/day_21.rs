@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use itertools::Itertools;
+
 const INPUT: &str = include_str!("../../input/day_21.txt");
 
 type Allergent<'a> = &'a str;
@@ -20,12 +22,7 @@ fn parse<'a>() -> (
         for allergent in parts[1].trim_end_matches(')').split(", ") {
             allergent_possibilities
                 .entry(allergent)
-                .and_modify(|s| {
-                    *s = s
-                        .intersection(&ingredients)
-                        .cloned()
-                        .collect::<HashSet<Ingredient<'a>>>();
-                })
+                .and_modify(|s| *s = &*s & &ingredients)
                 .or_insert(ingredients.clone());
         }
     }
@@ -58,8 +55,7 @@ fn part2<'a>(
             ingredients.remove(ingredient);
         }
     }
-    mapping.sort_by_key(|(a, _)| *a);
-    itertools::join(mapping.iter().map(|(_, i)| i), ",")
+    mapping.iter().sorted().map(|(_, i)| i).join(",")
 }
 
 fn main() {
