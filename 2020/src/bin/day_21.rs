@@ -2,29 +2,40 @@ use std::collections::{HashMap, HashSet};
 
 const INPUT: &str = include_str!("../../input/day_21.txt");
 
-fn part1() -> usize {
-    let mut allergent_possibilities: HashMap<&str, HashSet<&str>> = HashMap::new();
-    let mut all_ingredients: HashMap<&str, usize> = HashMap::new();
+type Allergent<'a> = &'a str;
+type Ingredient<'a> = &'a str;
+
+fn parse<'a>() -> (
+    HashMap<Allergent<'a>, HashSet<Ingredient<'a>>>,
+    HashMap<Ingredient<'a>, usize>,
+) {
+    let mut allergent_possibilities: HashMap<_, HashSet<_>> = HashMap::new();
+    let mut all_ingredients = HashMap::new();
     for line in INPUT.lines() {
         let parts: Vec<_> = line.split(" (contains ").collect();
         let ingredients: HashSet<_> = parts[0].split_ascii_whitespace().collect();
-        let allergens: HashSet<_> = parts[1].trim_end_matches(')').split(", ").collect();
         for ingredient in &ingredients {
-            *all_ingredients.entry(ingredient).or_default() += 1;
+            *all_ingredients.entry(*ingredient).or_default() += 1;
         }
-        for allergent in allergens {
-            if allergent_possibilities.contains_key(allergent) {
-                let value = allergent_possibilities[allergent]
-                    .intersection(&ingredients)
-                    .cloned()
-                    .collect();
-                allergent_possibilities.insert(allergent, value);
-            } else {
-                allergent_possibilities.insert(allergent, ingredients.clone());
-            }
+        for allergent in parts[1].trim_end_matches(')').split(", ") {
+            allergent_possibilities
+                .entry(allergent)
+                .and_modify(|s| {
+                    *s = s
+                        .intersection(&ingredients)
+                        .cloned()
+                        .collect::<HashSet<Ingredient<'a>>>();
+                })
+                .or_insert(ingredients.clone());
         }
     }
+    (allergent_possibilities, all_ingredients)
+}
 
+fn part1<'a>(
+    allergent_possibilities: &HashMap<Allergent<'a>, HashSet<Ingredient<'a>>>,
+    all_ingredients: &HashMap<Ingredient<'a>, usize>,
+) -> usize {
     all_ingredients
         .iter()
         .filter(|&(i, _)| (allergent_possibilities.values().all(|p| !p.contains(i))))
@@ -32,29 +43,9 @@ fn part1() -> usize {
         .sum()
 }
 
-fn part2() -> String {
-    let mut allergent_possibilities: HashMap<&str, HashSet<&str>> = HashMap::new();
-    let mut all_ingredients: HashMap<&str, usize> = HashMap::new();
-    for line in INPUT.lines() {
-        let parts: Vec<_> = line.split(" (contains ").collect();
-        let ingredients: HashSet<_> = parts[0].split_ascii_whitespace().collect();
-        let allergens: HashSet<_> = parts[1].trim_end_matches(')').split(", ").collect();
-        for ingredient in &ingredients {
-            *all_ingredients.entry(ingredient).or_default() += 1;
-        }
-        for allergent in allergens {
-            if allergent_possibilities.contains_key(allergent) {
-                let value = allergent_possibilities[allergent]
-                    .intersection(&ingredients)
-                    .cloned()
-                    .collect();
-                allergent_possibilities.insert(allergent, value);
-            } else {
-                allergent_possibilities.insert(allergent, ingredients.clone());
-            }
-        }
-    }
-
+fn part2<'a>(
+    allergent_possibilities: &mut HashMap<Allergent<'a>, HashSet<Ingredient<'a>>>,
+) -> String {
     let mut mapping = vec![];
     while let Some((allergent, ingredient)) = allergent_possibilities
         .iter()
@@ -72,6 +63,10 @@ fn part2() -> String {
 }
 
 fn main() {
-    println!("Part 1: {}", part1());
-    println!("Part 2: {}", part2());
+    let (mut allergent_possibilities, all_ingredients) = parse();
+    println!(
+        "Part 1: {}",
+        part1(&allergent_possibilities, &all_ingredients)
+    );
+    println!("Part 2: {}", part2(&mut allergent_possibilities));
 }
