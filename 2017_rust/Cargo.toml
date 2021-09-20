@@ -1,0 +1,8 @@
+[package]
+name = "AdventOfCode2017"
+version = "0.1.0"
+authors = ["Wilco Kusee <wilcokusee@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+crossbeam-channel = "0.5.1"
