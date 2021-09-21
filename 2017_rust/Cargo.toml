@@ -5,4 +5,6 @@ authors = ["Wilco Kusee <wilcokusee@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+bitvec = "0.22.3"
 crossbeam-channel = "0.5.1"
+itertools = "0.10.1"
