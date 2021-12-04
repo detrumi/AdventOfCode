@@ -1,11 +1,14 @@
 const INPUT: &str = include_str!("../../input/day_4.txt");
 
-fn has_won(card: &Vec<Vec<Option<usize>>>) -> bool {
+type Card = Vec<Vec<Option<usize>>>;
+
+fn has_won(card: &Card) -> bool {
     for y in 0..5 {
         if (0..5).all(|x| card[y][x].is_none()) {
             return true;
         }
     }
+
     for x in 0..5 {
         if (0..5).all(|y| card[y][x].is_none()) {
             return true;
@@ -15,10 +18,38 @@ fn has_won(card: &Vec<Vec<Option<usize>>>) -> bool {
     false
 }
 
-fn part1() -> usize {
+fn wins(draws: Vec<usize>, mut cards: Vec<Card>) -> Vec<usize> {
+    let mut result = vec![];
+    let mut won_cards = vec![false; cards.len()];
+    for draw in draws {
+        for (i, card) in &mut cards.iter_mut().enumerate() {
+            if won_cards[i] {
+                continue;
+            }
+            for y in 0..5 {
+                for x in 0..5 {
+                    if card[y][x] == Some(draw) {
+                        card[y][x] = None;
+                        if has_won(&card) {
+                            let points: usize = card
+                                .iter()
+                                .map(|row| row.iter().filter_map(|o| *o).sum::<usize>())
+                                .sum();
+                            result.push(points * draw);
+                            won_cards[i] = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    result
+}
+
+fn main() {
     let parts: Vec<_> = INPUT.trim().split("\n\n").collect();
     let draws: Vec<usize> = parts[0].split(',').map(|s| s.parse().unwrap()).collect();
-    let mut cards: Vec<Vec<Vec<Option<usize>>>> = parts[1..]
+    let cards: Vec<Card> = parts[1..]
         .iter()
         .map(|card| {
             card.lines()
@@ -31,37 +62,7 @@ fn part1() -> usize {
         })
         .collect();
 
-    let mut won_cards = vec![false; cards.len()];
-    for n in draws {
-        for (i, card) in &mut cards.iter_mut().enumerate() {
-            if won_cards[i] {
-                continue;
-            }
-            for y in 0..5 {
-                for x in 0..5 {
-                    if card[y][x] == Some(n) {
-                        card[y][x] = None;
-                        if has_won(&card) {
-                            let points: usize = card
-                                .iter()
-                                .map(|row| row.iter().filter_map(|o| *o).sum::<usize>())
-                                .sum();
-                            println!("Win: {}", points * n);
-                            won_cards[i] = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    0
-}
-
-fn part2() -> usize {
-    0
-}
-
-fn main() {
-    println!("Part 1: {}", part1());
-    println!("Part 2: {}", part2());
+    let wins = wins(draws, cards);
+    println!("Part 1: {}", wins[0]);
+    println!("Part 2: {}", wins.last().unwrap());
 }
