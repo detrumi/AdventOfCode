@@ -2,68 +2,84 @@ use std::collections::HashMap;
 
 const INPUT: &str = include_str!("../../input/day_9.txt");
 
-fn part1() -> u32 {
-    let lines: Vec<_> = INPUT.trim().lines().collect();
-    let width = lines[0].len();
-    let height = lines.len();
-    let input: Vec<u32> = lines
-        .iter()
-        .flat_map(|line| line.chars().map(|c| char::to_digit(c, 10).unwrap()))
-        .collect();
-    let mut result = 0;
-    for y in 0..height {
-        for x in 0..width {
-            let pos = (width * y + x) as isize;
-            let neighbors = vec![pos - width as isize, pos - 1, pos + 1, pos + width as isize];
-            if neighbors.iter().all(|n| {
-                *n < 0
-                    || (*n as usize) >= width * height
-                    || input[width * y + x] < input[*n as usize]
-            }) {
-                result += 1 + input[pos as usize];
-            }
+struct Map {
+    pub width: usize,
+    pub height: usize,
+    pub tiles: Vec<usize>,
+}
+
+impl Map {
+    pub fn parse() -> Self {
+        let lines: Vec<_> = INPUT.trim().lines().collect();
+        let width = lines[0].len();
+        let height = lines.len();
+        let tiles = lines
+            .iter()
+            .flat_map(|line| {
+                line.chars()
+                    .map(|c| char::to_digit(c, 10).unwrap() as usize)
+            })
+            .collect();
+
+        Self {
+            width,
+            height,
+            tiles,
         }
     }
-    result
+
+    pub fn neighbors(&self, pos: usize) -> Vec<usize> {
+        let x = pos % self.width;
+        let y = pos / self.width;
+        let mut result = vec![];
+        if x > 0 {
+            result.push(pos - 1)
+        }
+        if x + 1 < self.width {
+            result.push(pos + 1)
+        }
+        if y > 0 {
+            result.push(pos - self.width)
+        }
+        if y + 1 < self.height {
+            result.push(pos + self.width)
+        }
+        result
+    }
+}
+
+fn part1() -> usize {
+    let map = Map::parse();
+    (0..map.tiles.len())
+        .filter(|pos| {
+            map.neighbors(*pos)
+                .iter()
+                .all(|n| map.tiles[*pos] < map.tiles[*n])
+        })
+        .map(|pos| 1 + map.tiles[pos])
+        .sum()
 }
 
 fn part2() -> usize {
-    let lines: Vec<_> = INPUT.trim().lines().collect();
-    let width = lines[0].len();
-    let height = lines.len();
-    let input: Vec<u32> = lines
-        .iter()
-        .flat_map(|line| line.chars().map(|c| char::to_digit(c, 10).unwrap()))
-        .collect();
-
-    let mut basins: Vec<Option<usize>> = vec![None; input.len()];
+    let map = Map::parse();
+    let mut basins: Vec<Option<usize>> = vec![None; map.tiles.len()];
     let mut basin_index = 0;
-    for start in 0..input.len() as isize {
-        if input[start as usize] == 9 || basins[start as usize].is_some() {
+    for start in 0..map.tiles.len() {
+        if map.tiles[start] == 9 || basins[start].is_some() {
             continue;
         }
 
         let mut search = vec![start];
-        basins[start as usize] = Some(basin_index);
+        basins[start] = Some(basin_index);
         while search.len() > 0 {
             let mut new_search = vec![];
             for pos in &search {
-                let x = pos % width as isize;
-                let y = pos / width as isize;
-                for (dx, dy) in &[(-1, 0), (1, 0), (0, -1), (0, 1)] {
-                    if x + dx < 0
-                        || y + dy < 0
-                        || x + dx >= width as isize
-                        || y + dy >= height as isize
-                    {
-                        continue;
-                    }
-                    let neighbor = width as isize * (y + dy) + x + dx;
-                    if basins[neighbor as usize].is_some() || input[neighbor as usize] == 9 {
+                for neighbor in map.neighbors(*pos) {
+                    if basins[neighbor].is_some() || map.tiles[neighbor] == 9 {
                         continue;
                     }
 
-                    basins[neighbor as usize] = Some(basin_index);
+                    basins[neighbor] = Some(basin_index);
                     new_search.push(neighbor);
                 }
             }
