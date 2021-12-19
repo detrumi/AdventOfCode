@@ -92,29 +92,27 @@ fn rotations(mut v: Vec<Pos>) -> Vec<Vec<Pos>> {
 }
 
 fn solve() -> (usize, isize) {
-    let mut scanners = parse();
-    let initial_left = scanners.remove(0)[0].iter().cloned().collect();
-    let mut lefts: Vec<(Pos, HashSet<Pos>)> = vec![(Pos::default(), initial_left)];
-    while !scanners.is_empty() {
+    let mut input = parse();
+    let mut lefts: HashSet<Pos> = input.remove(0)[0].iter().cloned().collect();
+    let mut scanners: HashSet<Pos> = HashSet::new();
+    scanners.insert(Pos::default());
+    while !input.is_empty() {
         let mut right_index = 0;
-        'outer: while right_index < scanners.len() {
-            for i in 0..scanners[right_index].len() {
-                let rotation = &scanners[right_index][i];
-                for (_, left) in &lefts {
-                    for left_pos in left {
-                        for right_pos in rotation {
-                            let mut intersections = 0;
-                            let delta = *left_pos - *right_pos;
-                            for pos in rotation {
-                                if left.contains(&(*pos + delta)) {
-                                    intersections += 1;
-                                    if intersections >= 12 {
-                                        let right: HashSet<Pos> =
-                                            rotation.into_iter().map(|p| *p + delta).collect();
-                                        lefts.push((delta, right));
-                                        scanners.remove(right_index);
-                                        continue 'outer;
-                                    }
+        'outer: while right_index < input.len() {
+            for i in 0..input[right_index].len() {
+                let right = &input[right_index][i];
+                for left_pos in &lefts {
+                    for right_pos in right {
+                        let delta = *left_pos - *right_pos;
+                        let mut intersections = 0;
+                        for pos in right {
+                            if lefts.contains(&(*pos + delta)) {
+                                intersections += 1;
+                                if intersections >= 12 {
+                                    lefts.extend(right.into_iter().map(|p| *p + delta));
+                                    scanners.insert(delta);
+                                    input.remove(right_index);
+                                    continue 'outer;
                                 }
                             }
                         }
@@ -124,15 +122,13 @@ fn solve() -> (usize, isize) {
             right_index += 1;
         }
     }
-    let beacons: HashSet<_> = lefts.iter().flat_map(|(_, set)| set.iter()).collect();
-    let max_distance = lefts
+    let max_distance = scanners
         .iter()
-        .map(|(pos, _)| pos)
         .permutations(2)
         .map(|v| Pos::manhattan_distance(*v[0], *v[1]))
         .max()
         .unwrap();
-    (beacons.len(), max_distance)
+    (lefts.len(), max_distance)
 }
 
 fn main() {
