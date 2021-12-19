@@ -1,4 +1,7 @@
-use std::collections::HashSet;
+use std::{
+    collections::HashSet,
+    ops::{Add, Sub},
+};
 
 use itertools::Itertools;
 
@@ -9,6 +12,22 @@ struct Pos {
     pub x: isize,
     pub y: isize,
     pub z: isize,
+}
+
+impl Add for Pos {
+    type Output = Pos;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+    }
+}
+
+impl Sub for Pos {
+    type Output = Pos;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
 }
 
 fn parse() -> Vec<Vec<Vec<Pos>>> {
@@ -84,19 +103,19 @@ fn solve() -> (usize, isize) {
                 for (_, left) in &lefts {
                     for left_pos in left {
                         for right_pos in rotation {
-                            let delta = Pos::new(
-                                left_pos.x - right_pos.x,
-                                left_pos.y - right_pos.y,
-                                left_pos.z - right_pos.z,
-                            );
-                            let right: HashSet<Pos> = rotation
-                                .into_iter()
-                                .map(|p| Pos::new(p.x + delta.x, p.y + delta.y, p.z + delta.z))
-                                .collect();
-                            if left.intersection(&right).count() >= 12 {
-                                lefts.push((delta, right));
-                                scanners.remove(right_index);
-                                continue 'outer;
+                            let mut intersections = 0;
+                            let delta = *left_pos - *right_pos;
+                            for pos in rotation {
+                                if left.contains(&(*pos + delta)) {
+                                    intersections += 1;
+                                    if intersections >= 12 {
+                                        let right: HashSet<Pos> =
+                                            rotation.into_iter().map(|p| *p + delta).collect();
+                                        lefts.push((delta, right));
+                                        scanners.remove(right_index);
+                                        continue 'outer;
+                                    }
+                                }
                             }
                         }
                     }
