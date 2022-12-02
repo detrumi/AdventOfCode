@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-const INPUT: &str = include_str!("../input/day_1.txt");
+const INPUT: &str = include_str!("../../input/day_1.txt");
 
 fn parse() -> impl Iterator<Item = Vec<usize>> {
     INPUT.split("\n\n").map(|group| {
