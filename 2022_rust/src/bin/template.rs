@@ -1,7 +1,11 @@
 const INPUT: &str = include_str!("../../input/day_1.txt");
 
 fn parse() -> Vec<String> {
-    INPUT.lines().map(|line| line.parse().unwrap()).collect()
+    INPUT
+        .trim()
+        .lines()
+        .map(|line| line.parse().unwrap())
+        .collect()
 }
 
 fn part1() -> usize {
