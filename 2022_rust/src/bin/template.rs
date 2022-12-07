@@ -9,8 +9,11 @@ fn parse() -> Vec<String> {
 }
 
 fn part1() -> usize {
-    parse();
-    0
+    let mut result = 0;
+    for line in INPUT.trim().lines() {
+        //
+    }
+    result
 }
 
 fn part2() -> usize {
