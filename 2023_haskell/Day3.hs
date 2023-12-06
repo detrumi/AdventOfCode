@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 import Data.Char (isDigit)
 import Data.List (groupBy, sortBy)
 import Data.Function (on)

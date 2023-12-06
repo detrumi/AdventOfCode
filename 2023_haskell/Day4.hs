@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+
 import Data.Set (Set)
 import qualified Data.Set as Set
 
