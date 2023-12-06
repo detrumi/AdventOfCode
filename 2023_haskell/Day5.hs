@@ -22,15 +22,11 @@ part2 :: [(Int, Int)] -> [[[Int]]]  -> [(Int, Int)]
 part2 = foldl $ \ranges m -> concatMap (go m) ranges
 
 go :: [[Int]] -> (Int, Int) -> [(Int, Int)]
-go ([dest, src, len]:ms) (l,r) = let
-   left = concatMap (go ms) $ makeRange l ((src-1) `min` r)
-   right = concatMap (go ms) $ makeRange (l `max` (src+len)) r
-   middle = (\(l,r) -> (l-src+dest, r-src+dest)) <$> makeRange (src `max` l) (r `min` (src+len-1))
-   in left ++ middle ++ right
-go [] range = [range]
-
-makeRange l r | l <= r = [(l, r)]
-              | otherwise = []
+go ([dest, src, len]:ms) (l,r) = sides ++ middle
+  where range a b = let (a', b') = (l `max` a, b `min` r) in [(a', b') | a' <= b']
+        sides = concatMap (go ms) $ range l (src-1) ++ range (src+len) r
+        middle = both (+(dest-src)) <$> range src (src+len-1)
+go [] r = [r]
 
 
 split :: Eq a => a -> [a] -> [[a]]
@@ -42,3 +38,6 @@ chunksOf :: Int -> [a] -> [[a]]
 chunksOf n [] = []
 chunksOf n xs = g:chunksOf n gs
     where (g, gs) = splitAt n xs
+
+both :: (a -> b) -> (a, a) -> (b, b)
+both f (a, b) = (f a, f b)
