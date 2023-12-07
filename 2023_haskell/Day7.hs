@@ -1,20 +1,12 @@
-import Data.List (group, sort, sortBy, elemIndex, sortBy, transpose)
+import Data.List (group, sortBy, elemIndex, sortBy, transpose)
 import Data.Function (on)
-import Data.Maybe (fromJust)
+import Data.Ord (comparing, Down (Down))
 
-main = do
-    [hands, bids] <- transpose . map words . lines <$> readFile "input/day_7.txt"
-    print $ part1 $ zip hands bids
-    print $ part2 $ zip hands bids
+main = do [hands, bids] <- transpose . map words . lines <$> readFile "input/day_7.txt"
+          print . solve "AKQJT98765432" id id $ zip hands bids
+          print . solve "AKQT98765432J" (filter (/= 'J')) ((\(_:ls) -> 5-sum ls:ls) . (++ [0])) $ zip hands bids
 
-part1 = sum . zipWith (*) [1..] . map (read . snd) . sortBy ((\a b -> (compare `on` handType) b a <> secondOrdering b a) `on` fst)
-secondOrdering a b = head . filter (/= EQ) $ zipWith compareStrength a b
-handType = fromJust . (`elemIndex` [[5],[1,4],[2,3],[1,1,3],[1,2,2],[1,1,1,2],[1,1,1,1,1]]) . sort . map length . group . sortBy compareStrength
-compareStrength = compare `on` flip elemIndex "AKQJT98765432"
+solve s f g = let handType = g . sortBy (comparing Down) . map length . group . sortBy compareStrength . f
+                  compareStrength = comparing (`elemIndex` s)
+              in  sum . zipWith (*) [1..] . map (read . snd) . sortBy ((\a b -> mconcat $ comparing handType a b : zipWith compareStrength b a) `on` fst)
 
-part2 = sum . zipWith (*) [1..] . map (read . snd) . sortBy ((\a b -> (compare `on` handType') b a <> secondOrdering' b a) `on` fst)
-secondOrdering' a b = head . filter (/= EQ) $ zipWith compareStrength' a b
-handType' hand = fromJust . (`elemIndex` [[5],[1,4],[2,3],[1,1,3],[1,2,2],[1,1,1,2],[1,1,1,1,1]]) . (\l -> if not (null l) then init l ++ [last l + n] else [5])
-    . sort . map length . group . sortBy compareStrength' $ filter (/= 'J') hand
-    where n = length $ filter (== 'J') hand
-compareStrength' = compare `on` flip elemIndex "AKQT98765432J"
