@@ -1,4 +1,4 @@
-#![feature(let_chains, extend_one)]
+#![feature(extend_one)]
 
 use std::collections::HashSet;
 

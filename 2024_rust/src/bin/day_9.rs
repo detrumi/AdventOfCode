@@ -1,5 +1,3 @@
-#![feature(let_chains)]
-
 use std::iter;
 
 const INPUT: &str = include_str!("../../input/day_9.txt");

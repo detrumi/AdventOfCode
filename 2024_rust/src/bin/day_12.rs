@@ -1,5 +1,3 @@
-#![feature(let_chains)]
-
 use std::collections::HashSet;
 
 const INPUT: &str = include_str!("../../input/day_12.txt");
