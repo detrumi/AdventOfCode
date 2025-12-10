@@ -1,6 +1,6 @@
 const INPUT: &str = include_str!("../../input/day_1.txt");
 
-fn parse() -> Vec<String> {
+fn parse() -> Vec<usize> {
     INPUT
         .trim()
         .lines()
@@ -10,7 +10,7 @@ fn parse() -> Vec<String> {
 
 fn part1() -> usize {
     let mut result = 0;
-    for line in INPUT.trim().lines() {
+    for line in parse() {
         //
     }
     result
